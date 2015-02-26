@@ -2,6 +2,7 @@ from jabberbot import JabberBot, botcmd
 import datetime
 import logging
 import sys
+import time;
 
 from config import username, password, chatroom, adminuser
 
@@ -45,5 +46,9 @@ bot.join_room(chatroom, 'credilbot')
 bot.send(adminuser, 'Hello Julien, je suis connecte')
 #print bot.muc_room_participants(chatroom);
 bot.send(chatroom, 'Testing...', None, 'groupchat')
+
+while 1: 
+	bot.send(chatroom, str(datetime.datetime.now()), None, 'groupchat')
+	time.sleep(5)
 
 bot.serve_forever()
