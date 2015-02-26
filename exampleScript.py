@@ -44,6 +44,6 @@ bot = SystemInfoJabberBot(username,password)
 bot.join_room(chatroom, 'credilbot')
 bot.send(adminuser, 'Hello Julien, je suis connecte')
 #print bot.muc_room_participants(chatroom);
-bot.send(chatroom, 'Testing...')
+bot.send(chatroom, 'Testing...', None, 'groupchat')
 
 bot.serve_forever()
