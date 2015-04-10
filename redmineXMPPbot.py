@@ -56,7 +56,6 @@ root.addHandler(ch)
 bot = SystemInfoJabberBot(username,password)
 bot.join_room(chatroom, 'credilbot')
 debug('Hello Julien, je suis connecte')
-announce('Testing...');
 #print bot.muc_room_participants(chatroom);
 
 
