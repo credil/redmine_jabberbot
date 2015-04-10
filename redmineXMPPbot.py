@@ -1,3 +1,4 @@
+#!/usr/bin/python2.7
 from jabberbot import JabberBot, botcmd
 import datetime
 import logging
@@ -5,7 +6,17 @@ import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles
+
+def announce(message):
+    print message
+    debug('Trying to announce in ' + chatroom + ': ' + message)
+    bot.send(chatroom, message, None, 'groupchat')
+    time.sleep(1)
+    
+def debug(message):
+    print message
+    bot.send(adminuser, message)
 
 class SystemInfoJabberBot(JabberBot):
     @botcmd
@@ -45,11 +56,13 @@ root.addHandler(ch)
 bot = SystemInfoJabberBot(username,password)
 bot.join_room(chatroom, 'credilbot')
 debug('Hello Julien, je suis connecte')
+announce('Testing...');
 #print bot.muc_room_participants(chatroom);
-announce('Testing...') 
 
 
 def main():
+    threshold = 4
+
     #Define our connection string
     conn_string = "host='localhost' dbname='redmine' user='redmine' password='credil_007'"
  
@@ -62,21 +75,33 @@ def main():
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     cursor = conn.cursor()
     debug("Connected!\n")
+
+    sql = "select u.login, max(te.updated_on) from time_entries te, users u where u.id = te.user_id group by u.login order by max(te.updated_on);"
+
+    cursor.execute(sql)
+    data = cursor.fetchall()
+
+    lateUsers = []
+    for row in data: 
+        hoursSinceLastLog = (datetime.datetime.now() - row[1]).total_seconds() / 60 / 60
+	debug(str(row) + ' ' + str(hoursSinceLastLog))
+	
+	if hoursSinceLastLog > threshold and row[0] not in ignoreUsers:
+	    maker = row[0]
+            if maker in xmppHandles:
+		maker = xmppHandles[maker]
+ 	    lateUsers.append(maker);
+	
+    announce('The following users have not logged in the last ' + str(threshold) + ' hours')
+    announce(', '.join(lateUsers)) 
+        
  
 if __name__ == "__main__":
     main()
 
-while 1: 
-	debug(str(datetime.datetime.now()))
-	time.sleep(5)
+#while 1: 
+#	debug(str(datetime.datetime.now()))
+#	time.sleep(5)
 
 
-def announce(message)
-    print message
-    bot.send(chatroom, message, None, 'groupchat')
-    
-def debug(message)
-    print message
-    bot.send(adminuser, message)
-
-bot.serve_forever()
+#bot.serve_forever()
