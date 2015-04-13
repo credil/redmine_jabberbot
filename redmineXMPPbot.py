@@ -8,6 +8,8 @@ import time;
 
 from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles
 
+connected = False
+
 def announce(message):
     print message
     debug('Trying to announce in ' + chatroom + ': ' + message)
@@ -54,7 +56,6 @@ root.addHandler(ch)
 
 
 bot = SystemInfoJabberBot(username,password)
-bot.join_room(chatroom, 'credilbot')
 debug('Hello Julien, je suis connecte')
 #print bot.muc_room_participants(chatroom);
 
@@ -91,8 +92,10 @@ def main():
 		maker = xmppHandles[maker]
  	    lateUsers.append(maker);
 	
-    announce('The following users have not logged in the last ' + str(threshold) + ' hours')
-    announce(', '.join(lateUsers)) 
+    if lateUsers:
+	bot.join_room(chatroom, 'credilbot')
+	announce('The following users have not logged time in the last ' + str(threshold) + ' hours')
+	announce(', '.join(lateUsers)) 
         
  
 if __name__ == "__main__":
