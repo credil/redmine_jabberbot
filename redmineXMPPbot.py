@@ -6,7 +6,7 @@ import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig
 
 connected = False
 
@@ -61,7 +61,7 @@ debug('Hello Julien, je suis connecte')
 
 
 def main():
-    threshold = 4
+    thresholdDefault = 4
 
     #Define our connection string
     conn_string = "host='localhost' dbname='redmine' user='redmine' password='credil_007'"
@@ -85,16 +85,23 @@ def main():
     for row in data: 
         hoursSinceLastLog = (datetime.datetime.now() - row[1]).total_seconds() / 60 / 60
 	debug(str(row) + ' ' + str(hoursSinceLastLog))
+
+	redmineHandle = row[0]
 	
+	threshold = thresholdDefault; 
+	if redmineHandle in userConfig and 'threshold' in userConfig[redmineHandle]:
+	    threshold = userConfig[row[0]]['threshold']
+
 	if hoursSinceLastLog > threshold and row[0] not in ignoreUsers:
 	    maker = row[0]
             if maker in xmppHandles:
 		maker = xmppHandles[maker]
+ 	    #lateUsers.append(maker + ' (' + str(round(hoursSinceLastLog, 1)) + ' > ' + str(threshold) + ')');
  	    lateUsers.append(maker);
 	
     if lateUsers:
 	bot.join_room(chatroom, 'credilbot')
-	announce('The following users have not logged time in the last ' + str(threshold) + ' hours')
+	announce('The following users have not logged time within their set threshold (default 4)')
 	announce(', '.join(lateUsers)) 
         
  
