@@ -97,11 +97,11 @@ def main():
             if maker in xmppHandles:
 		maker = xmppHandles[maker]
  	    #lateUsers.append(maker + ' (' + str(round(hoursSinceLastLog, 1)) + ' > ' + str(threshold) + ')');
- 	    lateUsers.append(maker);
+ 	    lateUsers.append(maker)
 	
     if lateUsers:
 	bot.join_room(chatroom, 'credilbot')
-	announce('The following users have not logged time within their set threshold (default '+ thresholdDefault +')')
+	announce('The following users have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
 	announce(', '.join(lateUsers)) 
         
  
