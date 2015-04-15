@@ -18,7 +18,7 @@ def announce(message):
     
 def debug(message):
     print message
-    bot.send(adminuser, message)
+    #bot.send(adminuser, message)
 
 class SystemInfoJabberBot(JabberBot):
     @botcmd
