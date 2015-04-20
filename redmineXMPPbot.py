@@ -101,10 +101,9 @@ def main():
 	
     if lateUsers:
 	bot.join_room(chatroom, 'credilbot')
-	announce('The following users have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
-	announce(', '.join(lateUsers)) 
-        
- 
+	announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
+
+
 if __name__ == "__main__":
     main()
 
