@@ -6,7 +6,7 @@ import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string
 
 connected = False
 
@@ -63,9 +63,6 @@ debug('Hello Julien, je suis connecte')
 def main():
     thresholdDefault = 4
 
-    #Define our connection string
-    conn_string = "host='localhost' dbname='redmine' user='redmine' password='credil_007'"
- 
     # print the connection string we will use to connect
     debug("Connecting to database\n ->%s" % (conn_string))
  
