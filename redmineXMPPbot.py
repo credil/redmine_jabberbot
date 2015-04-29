@@ -6,7 +6,7 @@ import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames
 
 connected = False
 
@@ -78,6 +78,7 @@ def main():
     cursor.execute(sql)
     data = cursor.fetchall()
 
+    # Calculate late users first
     lateUsers = []
     for row in data: 
         hoursSinceLastLog = (datetime.datetime.now() - row[1]).total_seconds() / 60 / 60
@@ -96,9 +97,30 @@ def main():
  	    #lateUsers.append(maker + ' (' + str(round(hoursSinceLastLog, 1)) + ' > ' + str(threshold) + ')');
  	    lateUsers.append(maker)
 	
+
+    # Calculate total hours
+    sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' group by u.login order by sum(hours);"
+
+    cursor.execute(sql)
+    data = cursor.fetchall()
+
+    hoursLoggedStr = ''
+    for row in data: 
+	maker = row[0]
+        if maker in firstNames:
+	    maker = firstNames[maker]
+
+	hoursLoggedStr += maker + ': ' + str(row[1]) + ' (since ' + str(row[2]) + ')\n'
+
+
+    # Now for the annoucements
+    bot.join_room(chatroom, 'credilbot')
     if lateUsers:
-	bot.join_room(chatroom, 'credilbot')
 	announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
+
+    announce('Total numbers of hours logged in last 7 days')
+    announce(hoursLoggedStr)
+	
 
 
 if __name__ == "__main__":
