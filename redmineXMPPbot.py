@@ -64,7 +64,7 @@ def main():
     thresholdDefault = 4
 
     # print the connection string we will use to connect
-    debug("Connecting to database\n ->%s" % (conn_string))
+    debug("Connecting to database...")
  
     # get a connection, if a connect cannot be made an exception will be raised here
     conn = psycopg2.connect(conn_string)

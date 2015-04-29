@@ -1,0 +1,3 @@
+*Implement yml parser for db user credentials
+*Implement total hours logged for past 7 days threshold
+
