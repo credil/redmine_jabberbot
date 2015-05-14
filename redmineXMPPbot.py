@@ -5,6 +5,7 @@ import logging
 import psycopg2
 import sys
 import time;
+import subprocess 
 
 from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames
 
@@ -120,6 +121,8 @@ def main():
 
     announce('Total numbers of hours logged in last 7 days')
     announce(hoursLoggedStr)
+
+    announce(subprocess.check_output("/home/jlam/code/tlaloc/main.bash"));
 	
 
 
