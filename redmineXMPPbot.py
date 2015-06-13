@@ -113,6 +113,24 @@ def main():
 	hoursLoggedStr += maker + ': ' + str(row[1]) + ' (since ' + str(row[2]) + ')\n'
 
 
+
+    # Calculate hours per project, last 28 days
+    sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '28 days' group by u.login order by sum(hours);"
+
+    cursor.execute(sql)
+    data = cursor.fetchall()
+
+    hoursLast28days = ''
+    for row in data: 
+	maker = row[0]
+        if maker in firstNames:
+	    maker = firstNames[maker]
+
+	hoursLast28days += maker + ': ' + str(row[1]) + ' (since ' + str(row[2]) + ')\n'
+
+
+
+
     # Now for the annoucements
     bot.join_room(chatroom, 'credilbot')
     if lateUsers:
