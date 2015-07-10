@@ -34,13 +34,13 @@ def notify(redmineUser, message):
 	bot.send(xmppUser, message)
 	time.sleep(1)
 
-# count buisness days from beginning to untilDay inclusively
-def calcBuisnessDays(untilDay=31):
+# count buisness days from fromDay to untilDay inclusively
+def calcBuisnessDays(fromDay=1, untilDay=31):
     now = datetime.now()
     #holidays = [datetime.date(2013, 8, 14)] # you can add more here
     holidays = [] # you can add more here
     businessdays = 0
-    for i in range(1, untilDay +1):
+    for i in range(fromDay, untilDay +1):
         try:
             thisdate = date(now.year, now.month, i)
         except(ValueError):
@@ -121,8 +121,9 @@ def main():
 	for row in dataForMonth:
 		hoursWorkedThisMonth[row[0]] = float(row[1])
 
-	buisnessDays		= calcBuisnessDays(datetime.now().day)
+	buisnessDays		= calcBuisnessDays(1, datetime.now().day)
 	buisnessDaysTotal	= calcBuisnessDays()
+	buisnessDaysRemaining	= calcBuisnessDays(datetime.now().day, 32)
 
 
 ################################################################################
@@ -150,9 +151,10 @@ def main():
 
 		
 		#Generate the delta report
-		reportStr = "{0}: {1}, {2}, {3}".format(project, hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project])
-		notify(user, reportStr)
-		#reportStr = "%.1f / %.1f (%.1f)" % hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project]
+		delta = hoursWorkedThisMonth[project] - expectedMonth[project]
+		deltaSpreadOut = (float(hoursPerWeekExpected) / 5) - (float(delta) / float(buisnessDaysRemaining))
+		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}".format(project, hoursWorkedThisMonth[project], expectedMonth[project], delta, deltaSpreadOut)
+		notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
 	notify(user, "Bye\n")
