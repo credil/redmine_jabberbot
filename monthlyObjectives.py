@@ -3,11 +3,12 @@ from jabberbot import JabberBot, botcmd
 from datetime import datetime
 from datetime import date
 import logging
+import pprint
 import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, docURL
 from configMonthly import monthly
 
 class SystemInfoJabberBot(JabberBot):
@@ -20,6 +21,18 @@ class SystemInfoJabberBot(JabberBot):
 def debug(message):
     print message
     #bot.send(adminuser, message)
+
+def notify(redmineUser, message):
+	host = username.split('@')[1]
+
+	xmppUser = ''
+	if redmineUser in xmppHandles:
+       		xmppUser = xmppHandles[redmineUser] + '@' + host
+
+
+	#debug("Trying to notify {0} : {1}".format(xmppUser, message))
+	bot.send(xmppUser, message)
+	time.sleep(1)
 
 # count buisness days from beginning to untilDay inclusively
 def calcBuisnessDays(untilDay=31):
@@ -46,7 +59,7 @@ def dayFraction(beginHour = 9, endHour = 17):
 
 	nowHour = currentHour + currentMinute/60 + currentSecond/(60*60)
 
-	return nowHour-beginHour / (endHour - beginHour)
+	return (nowHour-beginHour) / (endHour - beginHour)
 
 
 root = logging.getLogger()
@@ -106,9 +119,7 @@ def main():
 	#Build a hash from that
 	hoursWorkedThisMonth = {}
 	for row in dataForMonth:
-		print "%s: %f" % row[0], row[1]
 		hoursWorkedThisMonth[row[0]] = float(row[1])
-	print "Done dataForMonth"
 
 	buisnessDays		= calcBuisnessDays(datetime.now().day)
 	buisnessDaysTotal	= calcBuisnessDays()
@@ -122,9 +133,9 @@ def main():
 
 	# For each project
 	expectedMonth = {}; deltaTodayForMonth = {};
-	debug("For user %s (Hours worked this month / Exepected until end of day today (delta): " % user)
-	debug("Postive delta: maker is ahead of hours expected")
-	debug("Negative delta: maker needs to do this many hours today to keep estimate at end of month on expected target")
+	notify(user, "%s, your hours for this month" % user)
+	#notify(user, "For user %s (Hours worked this month / Exepected until end of day today (delta): " % user)
+	#notify(user, "For deltas >0: maker is ahead of hours expected; <0: maker needs to do this many hours today to keep end of month estimates on expected target")
 	for(project, hoursPerWeekExpected) in data.items():
 		
 		#Calulate expected for 28 days: (I actually don't care about last 28 days, so not doing it)
@@ -132,14 +143,18 @@ def main():
 		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/5
 
 		#Calulate expected from beginning of month to today, end of day:
-		expectedMonth[project] = hoursPerWeekExpected*(buisnessDays+dayFraction())/5
+		expectedMonth[project] = hoursPerWeekExpected*(buisnessDays)/5
 		
 		#Calculate the deltas
 		deltaTodayForMonth[project] = expectedMonth[project] - hoursWorkedThisMonth[project]
 
 		
 		#Generate the delta report
-		reportStr = "%.1f / %.1f (%.1f)" % hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project]
+		reportStr = "{0}: {1}, {2}, {3}".format(project, hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project])
+		notify(user, reportStr)
+		#reportStr = "%.1f / %.1f (%.1f)" % hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project]
+
+	notify("See %s for documentation", docURL)
 
 
 if __name__ == "__main__":
