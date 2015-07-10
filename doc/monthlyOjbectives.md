@@ -2,6 +2,7 @@
 ## Numbers presented
 
 For each project, the numbers presented are
+
 1. Hours worked this month so far
 2. Number of hours exepected at end of day today
 3. The delta between the two
