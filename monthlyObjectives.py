@@ -133,7 +133,7 @@ def main():
 
 	# For each project
 	expectedMonth = {}; deltaTodayForMonth = {};
-	notify(user, "%s, your hours for this month" % user)
+	notify(user, "%s, your hours for this month so far today" % user)
 	#notify(user, "For user %s (Hours worked this month / Exepected until end of day today (delta): " % user)
 	#notify(user, "For deltas >0: maker is ahead of hours expected; <0: maker needs to do this many hours today to keep end of month estimates on expected target")
 	for(project, hoursPerWeekExpected) in data.items():
@@ -154,7 +154,8 @@ def main():
 		notify(user, reportStr)
 		#reportStr = "%.1f / %.1f (%.1f)" % hoursWorkedThisMonth[project], expectedMonth[project], hoursWorkedThisMonth[project] - expectedMonth[project]
 
-	notify("See %s for documentation", docURL)
+	notify(user, "See %s for documentation" % docURL)
+	notify(user, "Bye\n")
 
 
 if __name__ == "__main__":
