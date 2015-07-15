@@ -122,7 +122,7 @@ def main():
 	"group by p.identifier "\
 	"order by s desc ")
 
-	print sql
+	#print sql
 
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
@@ -166,10 +166,10 @@ def main():
 		lastEntry = hoursWorked[project]['lastEntry']
 		if lastEntry.date() < datetime.today().date():
 			lastEntry = datetime.now()
-		eta = lastEntry  + timedelta(hours=remainingToday)
+		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
 		#print hoursWorked[project]['lastEntry'], remainingToday, eta
 
-		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:%H:%m}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, deltaSpreadOut, remainingToday, eta)
+		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:%H:%M}, {:%H:%M}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, deltaSpreadOut, remainingToday, lastEntry, eta)
 		notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
