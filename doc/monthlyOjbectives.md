@@ -1,13 +1,17 @@
 # Monthly objectives reports
 ## Numbers presented
 
+Here is an example of what the script will output:
+
+```sg1: MTD: 40.6 - 52.0 = -11.4; T: 0.7 of 5.7, End: 17:03```
+
 For each project, the numbers presented are
 
-1. Hours worked this month so far
+1. Hours worked this month so far (MTD: Month to date)
 2. Number of hours exepected at end of day today
 3. The delta between the two
-4. The number of hours needed to work today to catch up (if spreading the detla among the remaining buisness day, including today)
-5. The hours of work remaining for today to catch up incrementally
+4. The hours worked today on that project
+5. The number of hours needed to work today to catch up (if spreading the detla among the remaining buisness day, including today)
 6. The estimated time the number of hours will be done, based on no breaks and time of last entry
 
 ## Deltas: postive, negative?

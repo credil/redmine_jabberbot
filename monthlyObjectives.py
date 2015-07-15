@@ -169,7 +169,7 @@ def main():
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
 		#print hoursWorked[project]['lastEntry'], remainingToday, eta
 
-		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:%H:%M}, {:%H:%M}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, deltaSpreadOut, remainingToday, lastEntry, eta)
+		reportStr = "{:s}: MTD: {:.1f} - {:.1f} = {:.1f}; T: {:.1f} of {:.1f}; End: {:%H:%M}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, hoursWorked[project]['today'], deltaSpreadOut, eta)
 		notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
