@@ -1,7 +1,6 @@
 #!/usr/bin/python2.7
 from jabberbot import JabberBot, botcmd
-from datetime import datetime
-from datetime import date
+from datetime import datetime, date , timedelta
 import logging
 import pprint
 import psycopg2
@@ -113,23 +112,34 @@ def main():
         "group by p.identifier "
         "order by s desc; ")
 
+	sql = ("select p.identifier, sum(te.hours) as month, "\
+	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
+	"max(te.updated_on) as s "\
+	"from time_entries te, projects p, users u "\
+	"where u.login = 'jlam' and u.id = te.user_id "\
+	"  and spent_on between date_trunc('month', current_date) and now()   "\
+	"  and te.project_id = p.id "\
+	"group by p.identifier "\
+	"order by s desc ")
+
+	print sql
+
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
 
 	#Build a hash from that
-	hoursWorkedThisMonth = {}
+	hoursWorked = {}
 	for row in dataForMonth:
-		hoursWorkedThisMonth[row[0]] = float(row[1])
+		hoursWorked[row[0]] = {'month' : float(row[1]), 'today' : float(row[2]), 'lastEntry' : row[3]}
 
 	buisnessDays		= calcBuisnessDays(1, datetime.now().day)
 	buisnessDaysTotal	= calcBuisnessDays()
 	buisnessDaysRemaining	= calcBuisnessDays(datetime.now().day, 32)
 
 
-################################################################################
 
 	allProjects = data.keys()
-	allProjects.append(hoursWorkedThisMonth.keys())
+	allProjects.append(hoursWorked.keys())
 		
 
 	# For each project
@@ -139,21 +149,27 @@ def main():
 	#notify(user, "For deltas >0: maker is ahead of hours expected; <0: maker needs to do this many hours today to keep end of month estimates on expected target")
 	for(project, hoursPerWeekExpected) in data.items():
 		
-		#Calulate expected for 28 days: (I actually don't care about last 28 days, so not doing it)
-		#But keeping the code in case I change my mind
+		### Calulate expected for 28 days: 
+		# (I actually don't care about last 28 days, so not doing it)
+		# But keeping the code in case I change my mind
 		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/5
 
 		#Calulate expected from beginning of month to today, end of day:
-		expectedMonth[project] = hoursPerWeekExpected*(buisnessDays)/5
-		
-		#Calculate the deltas
-		deltaTodayForMonth[project] = expectedMonth[project] - hoursWorkedThisMonth[project]
-
+		expectedMonthUntilEndOfDay = hoursPerWeekExpected*(buisnessDays)/5
 		
 		#Generate the delta report
-		delta = hoursWorkedThisMonth[project] - expectedMonth[project]
-		deltaSpreadOut = (float(hoursPerWeekExpected) / 5) - (float(delta) / float(buisnessDaysRemaining))
-		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}".format(project, hoursWorkedThisMonth[project], expectedMonth[project], delta, deltaSpreadOut)
+		delta = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
+		deltaSpreadOut = (float(hoursPerWeekExpected) / 5) - ((float(delta) - float(hoursWorked[project]['today'])) / float(buisnessDaysRemaining))
+
+		remainingToday = float(deltaSpreadOut) - float(hoursWorked[project]['today'])
+
+		lastEntry = hoursWorked[project]['lastEntry']
+		if lastEntry.date() < datetime.today().date():
+			lastEntry = datetime.now()
+		eta = lastEntry  + timedelta(hours=remainingToday)
+		#print hoursWorked[project]['lastEntry'], remainingToday, eta
+
+		reportStr = "{:s}: {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:.1f}, {:%H:%m}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, deltaSpreadOut, remainingToday, eta)
 		notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
