@@ -3,16 +3,16 @@
 
 Here is an example of what the script will output:
 
-```sg1: MTD: 40.6 - 52.0 = -11.4; T: 0.7 of 5.7, End: 17:03```
+```sg1: MTD delta: -11.8; T: 2.4/6.0; End: 16:36```
 
 For each project, the numbers presented are
 
-1. Hours worked this month so far (MTD: Month to date)
-2. Number of hours exepected at end of day today
-3. The delta between the two
-4. The hours worked today on that project
-5. The number of hours needed to work today to catch up (if spreading the detla among the remaining buisness day, including today)
-6. The estimated time the number of hours will be done, based on no breaks and time of last entry
+1. The delta between hours worked this month and expected this month at end of day
+** Positive means ahead 
+** Negative means you are behind (if it was the end of day)
+2. The hours worked today on that project
+3. The number of hours needed to work today to catch up (if spreading the detla among the remaining buisness day, including today)
+4. The estimated time the number of hours will be done, based on no breaks and time of last entry
 
 ## Deltas: postive, negative?
 * For a delta >0: the redmine user is ahead of hours expected; 
