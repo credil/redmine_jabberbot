@@ -143,10 +143,10 @@ def main():
 		
 
 	# For each project
-	expectedMonth = {}; deltaTodayForMonth = {};
+	
 	notify(user, "%s, your hours for this month so far today" % user)
-	#notify(user, "For user %s (Hours worked this month / Exepected until end of day today (delta): " % user)
-	#notify(user, "For deltas >0: maker is ahead of hours expected; <0: maker needs to do this many hours today to keep end of month estimates on expected target")
+	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0
+	lastEntryMax = date(1, 1, 1); lastEntryMax = datetime.combine(lastEntryMax, datetime.min.time())
 	for(project, hoursPerWeekExpected) in data.items():
 		
 		### Calulate expected for 28 days: 
@@ -159,21 +159,31 @@ def main():
 		
 		#Generate the delta report
 		delta = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
+		deltaTotal += delta
+
 		deltaSpreadOut = (float(hoursPerWeekExpected) / 5) - ((float(delta) - float(hoursWorked[project]['today'])) / float(buisnessDaysRemaining))
+		deltaSpreadOutTotal += deltaSpreadOut
 
 		remainingToday = float(deltaSpreadOut) - float(hoursWorked[project]['today'])
+		remainingTodayTotal += remainingToday
 
 		lastEntry = hoursWorked[project]['lastEntry']
-		if lastEntry.date() < datetime.today().date():
+		lastEntryMax = max(lastEntryMax, lastEntry)
+		diff = datetime.now() - lastEntry
+		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
 			lastEntry = datetime.now()
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
-		#print hoursWorked[project]['lastEntry'], remainingToday, eta
+			
 
 		## Old format: reportStr = "{:s}: MTD: {:.1f} - {:.1f} = {:.1f}; T: {:.1f} of {:.1f}; End: {:%H:%M}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, hoursWorked[project]['today'], deltaSpreadOut, eta)
 
 		# Print with more condensed format
 		reportStr = "{:s}: MTD delta: {:.1f}; Today: {:.1f}/{:.1f}; End: {:%H:%M}".format(project,  delta, hoursWorked[project]['today'], deltaSpreadOut, eta)
 		notify(user, reportStr) 
+
+	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
+	reportStr = "Total: MTD delta: {:.1f}; Today: {:.1f}/{:.1f}; End: {:%H:%M}".format(deltaTotal, hoursWorked[project]['today'], deltaSpreadOutTotal, eta)
+	notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
 	notify(user, "Bye\n")
