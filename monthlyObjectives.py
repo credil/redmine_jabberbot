@@ -168,11 +168,11 @@ def main():
 		remainingTodayTotal += remainingToday
 
 		lastEntry = hoursWorked[project]['lastEntry']
-		lastEntryMax = max(lastEntryMax, lastEntry)
 		diff = datetime.now() - lastEntry
 		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
 			lastEntry = datetime.now()
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
+		lastEntryMax = max(lastEntryMax, lastEntry)
 			
 
 		## Old format: reportStr = "{:s}: MTD: {:.1f} - {:.1f} = {:.1f}; T: {:.1f} of {:.1f}; End: {:%H:%M}".format(project, hoursWorked[project]['month'], expectedMonthUntilEndOfDay, delta, hoursWorked[project]['today'], deltaSpreadOut, eta)
