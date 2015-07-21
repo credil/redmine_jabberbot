@@ -145,7 +145,7 @@ def main():
 	# For each project
 	
 	notify(user, "%s, your hours for this month so far today" % user)
-	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0
+	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0; workedTodayTotal = 0
 	lastEntryMax = date(1, 1, 1); lastEntryMax = datetime.combine(lastEntryMax, datetime.min.time())
 	for(project, hoursPerWeekExpected) in data.items():
 		
@@ -153,6 +153,9 @@ def main():
 		# (I actually don't care about last 28 days, so not doing it)
 		# But keeping the code in case I change my mind
 		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/5
+		
+		#Add worked today totals for reporting after the this for loop
+		workedTodayTotal += hoursWorked[project]['today']
 
 		#Calulate expected from beginning of month to today, end of day:
 		expectedMonthUntilEndOfDay = hoursPerWeekExpected*(buisnessDays)/5
@@ -182,7 +185,7 @@ def main():
 		notify(user, reportStr) 
 
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
-	reportStr = "Total: MTD delta: {:.1f}; Today: {:.1f}/{:.1f}; End: {:%H:%M}".format(deltaTotal, hoursWorked[project]['today'], deltaSpreadOutTotal, eta)
+	reportStr = "Total: MTD delta: {:.1f}; Today: {:.1f}/{:.1f}; End: {:%H:%M}".format(deltaTotal, workedTodayTotal, deltaSpreadOutTotal, eta)
 	notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
