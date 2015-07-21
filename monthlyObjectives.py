@@ -134,7 +134,7 @@ def main():
 
 	buisnessDays		= calcBuisnessDays(1, datetime.now().day)
 	buisnessDaysTotal	= calcBuisnessDays()
-	buisnessDaysRemaining	= calcBuisnessDays(datetime.now().day, 32)
+	buisnessDaysRemaining	= max(calcBuisnessDays(datetime.now().day, 32), 1)
 
 
 
