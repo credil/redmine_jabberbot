@@ -9,8 +9,8 @@ Here is an example of what the script will output:
 For each project, the numbers presented are
 
 1. The delta between hours worked this month and expected this month at end of day
-** Positive means you are ahead 
-** Negative means you are behind (if it was the end of day)
+ * Positive means you are ahead 
+ * Negative means you are behind (if it was the end of day)
 2. The hours worked today on that project
 3. The number of hours needed to work today to catch up (if spreading the detla among the remaining buisness day, including today)
 4. The increase in the previous number if you stopped working now with no further time logging for today
