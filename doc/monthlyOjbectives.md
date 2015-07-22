@@ -3,7 +3,10 @@
 
 Here is an example of what the script will output:
 
-```sg1: MTD delta: -18.6; Today: 0.0/7.1 (+1.0); End: 17:38```
+```
+sg1: MTD delta: -18.6; Today: 0.0/7.1 (+1.0); End: 17:38
+                 (1)          (2) (3)  (4)          (5)
+```
 
 
 For each project, the numbers presented are
