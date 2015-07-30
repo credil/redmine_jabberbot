@@ -166,7 +166,9 @@ def main():
 
 		#Detla spread out: if you wanted 0 delta by end of month, how much would 
 		#you have to work on the remaining buisness days, including today
-		deltaSpreadOut = (float(hoursPerWeekExpected) / 5) - ((float(delta) - float(hoursWorked[project]['today'])) / float(buisnessDaysRemaining))
+		expectedMonthUntilYesterdayEOD = hoursPerWeekExpected*(buisnessDays-1)/5
+		expectedEndOfMonth = hoursPerWeekExpected*(float(buisnessDaysTotal))/5
+		deltaSpreadOut = (expectedEndOfMonth - (float(hoursWorked[project]['month']) - float(hoursWorked[project]['today'])))/float(buisnessDaysRemaining)
 		deltaSpreadOutTotal += deltaSpreadOut
 
 		#Detla increase: If you stopped working now, how much would your delta spread out increase by
@@ -179,15 +181,18 @@ def main():
 
 		lastEntry = hoursWorked[project]['lastEntry']
 		diff = datetime.now() - lastEntry
+		lastEntryMax = max(lastEntryMax, lastEntry)
 		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
 			lastEntry = datetime.now()
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
-		lastEntryMax = max(lastEntryMax, lastEntry)
 			
 		# Print with more condensed format
 		reportStr = "{:s}: MTD delta: {:.1f}; Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
 		notify(user, reportStr) 
 
+	diff = datetime.now() - lastEntryMax
+	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
+		lastEntryMax = datetime.now()
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
 	reportStr = "Total: MTD delta: {:.1f}; Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
 	notify(user, reportStr) 
