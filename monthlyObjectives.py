@@ -148,7 +148,9 @@ def main():
 	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0; workedTodayTotal = 0; deltaIncreaseTotal = 0;
 	lastEntryMax = date(1, 1, 1); lastEntryMax = datetime.combine(lastEntryMax, datetime.min.time())
 	for(project, hoursPerWeekExpected) in data.items():
-		
+		if project not in hoursWorked:
+			hoursWorked[project] = {'month' : 0, 'today' : 0, 'lastEntry' : datetime.now()}
+
 		### Calulate expected for 28 days: 
 		# (I actually don't care about last 28 days, so not doing it)
 		# But keeping the code in case I change my mind
@@ -158,7 +160,7 @@ def main():
 		workedTodayTotal += hoursWorked[project]['today']
 
 		#Calulate expected from beginning of month to today, end of day:
-		expectedMonthUntilEndOfDay = hoursPerWeekExpected*(buisnessDays)/5
+		expectedMonthUntilEndOfDay = hoursPerWeekExpected*float(buisnessDays)/5
 		
 		#Generate the delta report
 		delta = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
