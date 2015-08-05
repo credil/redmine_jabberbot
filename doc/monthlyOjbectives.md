@@ -30,6 +30,6 @@ At the time of this writting, there are no banks that are taken into account whe
 * For a delta <0: the redmine user needs do this many hours today to keep end of month estimates on expected target
 
 ## FAQ 
-### If I did the all the hours for today indicated by the script, why is the delta still negative
+### If I did the all the hours for today indicated by the script, why is the delta still negative?
 
 Because it's the number to catch up *gradually*, not to catch up to the total number of hours expected.
