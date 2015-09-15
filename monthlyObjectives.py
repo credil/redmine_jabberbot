@@ -184,7 +184,10 @@ def main():
 		lastEntry = hoursWorked[project]['lastEntry']
 		diff = datetime.now() - lastEntry
 		lastEntryMax = max(lastEntryMax, lastEntry)
-		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
+		
+		# To refresh average time entry, 
+		# select login, avg(hours) as hours from time_entries te, users u where user_id = u.id and hours between 0 and 6 group by u.login order by hours;
+		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=0.83): 
 			lastEntry = datetime.now()
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
 			
