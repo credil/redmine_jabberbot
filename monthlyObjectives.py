@@ -34,7 +34,11 @@ def notify(redmineUser, message):
 	time.sleep(1)
 
 # count buisness days from fromDay to untilDay inclusively
-def calcBuisnessDays(fromDay=1, untilDay=31):
+def calcBuisnessDays(fromDay=1, untilDay=31, calcBuisnessDaysOnly=True):
+
+    #if ! calcBuisnessDaysOnly
+#	return untilDay + 1 - fromDay
+
     now = datetime.now()
     #holidays = [datetime.date(2013, 8, 14)] # you can add more here
     holidays = [] # you can add more here
@@ -50,15 +54,16 @@ def calcBuisnessDays(fromDay=1, untilDay=31):
     return businessdays
 
 
-def dayFraction(beginHour = 9, endHour = 17):
+def dayFraction(beginHour = 9, endHour = 18):
 
 	currentSecond= datetime.now().second
         currentMinute = datetime.now().minute
         currentHour = datetime.now().hour
 
-	nowHour = currentHour + currentMinute/60 + currentSecond/(60*60)
+	nowHour = currentHour + float(currentMinute)/60 + float(currentSecond)/(60*60)
+	#debug("%f = %f + %f/60 + %f/(60*60)" % (nowHour, currentHour, currentMinute, currentSecond))
 
-	return (nowHour-beginHour) / (endHour - beginHour)
+	return (float(nowHour)-float(beginHour)) / (float(endHour) - float(beginHour))
 
 
 root = logging.getLogger()
@@ -85,9 +90,9 @@ def main():
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     cursor = conn.cursor()
     debug("Connected!\n")
-
+        
     for (user, data) in monthly.items():
-
+    
         # Number of hours per project spent last 28 days
 	debug("Doing %s..." % user)
         sql = """select p.identifier, sum(te.hours) as s 
@@ -102,8 +107,8 @@ def main():
         cursor.execute(sql)
         #cursor.execute(sql)
         data28days = cursor.fetchall()
-
-
+    
+    
 	#Number of hours per project spent since beginning of month
 	sql = ("select p.identifier, sum(te.hours) as s from time_entries te, projects p, users u "
         "where u.login = 'jlam' and u.id = te.user_id  "
@@ -111,7 +116,7 @@ def main():
         "  and te.project_id = p.id "
         "group by p.identifier "
         "order by s desc; ")
-
+    
 	sql = ("select p.identifier, sum(te.hours) as month, "\
 	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
 	"max(te.updated_on) as s "\
@@ -121,31 +126,34 @@ def main():
 	"  and te.project_id = p.id "\
 	"group by p.identifier "\
 	"order by s desc ")
-
+    
 	#print sql
 
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
-
+    
 	#Build a hash from that
 	hoursWorked = {}
 	for row in dataForMonth:
 		hoursWorked[row[0]] = {'month' : float(row[1]), 'today' : float(row[2]), 'lastEntry' : row[3]}
-
-	buisnessDays		= calcBuisnessDays(1, datetime.now().day)
-	buisnessDaysTotal	= calcBuisnessDays()
-	buisnessDaysRemaining	= max(calcBuisnessDays(datetime.now().day, 32), 1)
-
-
-
-	allProjects = data.keys()
+    
+	buisnessDays = calcBuisnessDays(1, datetime.now().day)
+	buisnessDaysTotal = calcBuisnessDays()
+	buisnessDaysRemaining = max(calcBuisnessDays(datetime.now().day, 32), 1)
+	frac = dayFraction();
+	forecastRatio = float(buisnessDaysTotal) / (float(buisnessDays) + float(frac))
+	#debug("%.1f = %.1f / (%.1f + %.1f)" % (forecastRatio, buisnessDaysTotal, buisnessDays, frac))
+	debug("Doing %s..." % user)
+     
+    	allProjects = data.keys()
 	allProjects.append(hoursWorked.keys())
 		
 
 	# For each project
 	
 	notify(user, "%s, your hours for this month so far today" % user)
-	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0; workedTodayTotal = 0; deltaIncreaseTotal = 0;
+	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0; 
+    	workedTodayTotal = 0; deltaIncreaseTotal = 0; deltaForcastTotal = 0;
 	lastEntryMax = date(1, 1, 1); lastEntryMax = datetime.combine(lastEntryMax, datetime.min.time())
 	for(project, hoursPerWeekExpected) in data.items():
 		if project not in hoursWorked:
@@ -163,8 +171,13 @@ def main():
 		expectedMonthUntilEndOfDay = hoursPerWeekExpected*float(buisnessDays)/5
 		
 		#Generate the delta report
-		delta = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
-		deltaTotal += delta
+		delta        = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
+		deltaTotal  += delta
+
+		#Forcast delta at end of month
+        	deltaForcast         = delta * forecastRatio
+	        deltaForcastTotal   += deltaForcast 
+        
 
 		#Detla spread out: if you wanted 0 delta by end of month, how much would 
 		#you have to work on the remaining buisness days, including today
@@ -192,14 +205,14 @@ def main():
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
 			
 		# Print with more condensed format
-		reportStr = "{:s}: MTD delta: {:.1f}; Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
+		reportStr = "{:s}: MTD delta: {:.1f} ({:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, deltaForcast, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
 		notify(user, reportStr) 
 
 	diff = datetime.now() - lastEntryMax
 	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
 		lastEntryMax = datetime.now()
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
-	reportStr = "Total: MTD delta: {:.1f}; Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
+	reportStr = "Total: MTD delta: {:.1f} ({:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, deltaForcastTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
 	notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
