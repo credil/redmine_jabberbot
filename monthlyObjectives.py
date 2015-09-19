@@ -36,8 +36,8 @@ def notify(redmineUser, message):
 # count buisness days from fromDay to untilDay inclusively
 def calcBuisnessDays(fromDay=1, untilDay=31, calcBuisnessDaysOnly=True):
 
-    #if ! calcBuisnessDaysOnly
-#	return untilDay + 1 - fromDay
+    if not calcBuisnessDaysOnly:
+	return untilDay + 1 - fromDay
 
     now = datetime.now()
     #holidays = [datetime.date(2013, 8, 14)] # you can add more here
@@ -137,12 +137,19 @@ def main():
 	for row in dataForMonth:
 		hoursWorked[row[0]] = {'month' : float(row[1]), 'today' : float(row[2]), 'lastEntry' : row[3]}
     
-	buisnessDays = calcBuisnessDays(1, datetime.now().day)
-	buisnessDaysTotal = calcBuisnessDays()
-	buisnessDaysRemaining = max(calcBuisnessDays(datetime.now().day, 32), 1)
+
+	# Calculate date stuff
+        now = datetime.now()
+	thisdate = date(now.year, now.month, now.day)
+	weekday = thisdate.weekday() < 5
+	buisnessDays = calcBuisnessDays(1, datetime.now().day, weekday)
+	buisnessDaysTotal = calcBuisnessDays(1, 32, weekday)
+	buisnessDaysRemaining = max(calcBuisnessDays(datetime.now().day, 32, weekday), 1)
 	frac = dayFraction();
 	forecastRatio = float(buisnessDaysTotal) / (float(buisnessDays) + float(frac))
 	#debug("%.1f = %.1f / (%.1f + %.1f)" % (forecastRatio, buisnessDaysTotal, buisnessDays, frac))
+
+
 	debug("Doing %s..." % user)
      
     	allProjects = data.keys()
@@ -168,7 +175,8 @@ def main():
 		workedTodayTotal += hoursWorked[project]['today']
 
 		#Calulate expected from beginning of month to today, end of day:
-		expectedMonthUntilEndOfDay = hoursPerWeekExpected*float(buisnessDays)/5
+		daysPerWeek = 5 if weekday else 7
+		expectedMonthUntilEndOfDay = hoursPerWeekExpected*float(buisnessDays)/daysPerWeek
 		
 		#Generate the delta report
 		delta        = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
@@ -181,8 +189,8 @@ def main():
 
 		#Detla spread out: if you wanted 0 delta by end of month, how much would 
 		#you have to work on the remaining buisness days, including today
-		expectedMonthUntilYesterdayEOD = hoursPerWeekExpected*(buisnessDays-1)/5
-		expectedEndOfMonth = hoursPerWeekExpected*(float(buisnessDaysTotal))/5
+		expectedMonthUntilYesterdayEOD = hoursPerWeekExpected*(buisnessDays-1)/daysPerWeek
+		expectedEndOfMonth = hoursPerWeekExpected*(float(buisnessDaysTotal))/daysPerWeek
 		deltaSpreadOut = (expectedEndOfMonth - (float(hoursWorked[project]['month']) - float(hoursWorked[project]['today'])))/float(buisnessDaysRemaining)
 		deltaSpreadOutTotal += deltaSpreadOut
 
