@@ -169,7 +169,7 @@ def main():
 		### Calulate expected for 28 days: 
 		# (I actually don't care about last 28 days, so not doing it)
 		# But keeping the code in case I change my mind
-		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/5
+		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/weekday
 		
 		#Add worked today totals for reporting after the this for loop
 		workedTodayTotal += hoursWorked[project]['today']
