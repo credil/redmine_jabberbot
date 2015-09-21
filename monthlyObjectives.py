@@ -176,10 +176,10 @@ def main():
 
 		#Calulate expected from beginning of month to today, end of day:
 		daysPerWeek = 5 if weekday else 7
-		expectedMonthUntilEndOfDay = hoursPerWeekExpected*float(buisnessDays)/daysPerWeek
+		expectedMonthUntilNow = hoursPerWeekExpected*float(buisnessDays-1+frac)/daysPerWeek
 		
 		#Generate the delta report
-		delta        = hoursWorked[project]['month'] - expectedMonthUntilEndOfDay
+		delta        = hoursWorked[project]['month'] - expectedMonthUntilNow
 		deltaTotal  += delta
 
 		#Forcast delta at end of month
