@@ -213,14 +213,14 @@ def main():
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
 			
 		# Print with more condensed format
-		reportStr = "{:s}: MTD delta: {:.1f} ({:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, deltaForcast, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
+		reportStr = "{:s}: MTD delta: {:.1f} (Frcst: {:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, deltaForcast, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
 		notify(user, reportStr) 
 
 	diff = datetime.now() - lastEntryMax
 	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
 		lastEntryMax = datetime.now()
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
-	reportStr = "Total: MTD delta: {:.1f} ({:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, deltaForcastTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
+	reportStr = "Total: MTD delta: {:.1f} (Frcst: {:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, deltaForcastTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
 	notify(user, reportStr) 
 
 	notify(user, "See %s for documentation" % docURL)
