@@ -144,7 +144,8 @@ def main():
 	# Calculate date stuff
         now = datetime.now()
 	thisdate = date(now.year, now.month, now.day)
-	weekday = thisdate.weekday() < 5
+	# weekday = thisdate.weekday() < 5
+	weekday = True   # Always assume it's a weekday as we want to see the weekday plan on a weekend
 	buisnessDays = calcBuisnessDays(1, datetime.now().day, weekday)
 	buisnessDaysTotal = calcBuisnessDays(1, 32, weekday)
 	buisnessDaysRemaining = max(calcBuisnessDays(datetime.now().day, 32, weekday), 1)
