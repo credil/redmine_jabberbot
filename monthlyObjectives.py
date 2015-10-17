@@ -63,7 +63,10 @@ def dayFraction(beginHour = 9, endHour = 18):
 	nowHour = currentHour + float(currentMinute)/60 + float(currentSecond)/(60*60)
 	#debug("%f = %f + %f/60 + %f/(60*60)" % (nowHour, currentHour, currentMinute, currentSecond))
 
-	return (float(nowHour)-float(beginHour)) / (float(endHour) - float(beginHour))
+	frac = max(min((float(nowHour)-float(beginHour)) / (float(endHour) - float(beginHour)), 1), 0)
+
+	debug(frac)
+	return frac
 
 
 root = logging.getLogger()
