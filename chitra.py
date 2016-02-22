@@ -7,10 +7,27 @@ import sys
 import time;
 
 from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, docURL
-from config
+from configChitra import settings
 
 def debug(message):
     print message
+
+def buildTopParent():
+    sql = """WITH RECURSIVE Ancestors AS (
+   	SELECT id, parent_id, 0 AS level FROM projects WHERE parent_id IS NULL
+	   UNION ALL
+	SELECT child.id, child.parent_id, level+1 
+	   FROM projects child 
+	       INNER JOIN Ancestors p ON p.id=child.parent_id
+	)
+	SELECT p.id, a.parent_id, a.level 
+		FROM Ancestors a
+		INNER JOIN Projects p ON p.id = a.id
+	;"""
+    cursor.execute(sql)
+    allProjects = cursor.fetchall()
+
+    
 
 def main():
     # print the connection string we will use to connect
@@ -22,6 +39,9 @@ def main():
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     cursor = conn.cursor()
     debug("Connected!\n")
+
+
+    allProjects = buildTopParent
         
     
     # Number of hours per project spent since the beginning of time
@@ -42,7 +62,7 @@ def main():
 
     exit
     
-    
+
 if __name__ == "__main__":
     main()
 

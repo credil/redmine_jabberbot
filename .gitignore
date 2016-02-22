@@ -2,4 +2,4 @@ config.py*
 *.sw?
 redmine.code.sql*
 configMonthly.py*
-configChitra.py
+configChitra.py*
