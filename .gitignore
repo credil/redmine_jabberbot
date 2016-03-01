@@ -3,3 +3,4 @@ config.py*
 redmine.code.sql*
 configMonthly.py*
 configChitra.py*
+thisQueryWorks.txt
