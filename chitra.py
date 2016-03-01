@@ -46,22 +46,37 @@ def main():
     for user in settings:
 	for client in settings[user]:
 		dateSince = settings[user][client]["since"].strftime('%Y-%m-%d')
-    		sql = """select u.login, p.identifier, p.id, p.parent_id, sum(te.hours) as s, min(spent_on)
-			from time_entries te, projects p, users u 
+    		sql = """WITH RECURSIVE Ancestors AS (
+			SELECT id, parent_id, 0 AS level FROM projects WHERE parent_id IS NULL
+			UNION ALL 
+			SELECT child.id, child.parent_id, level+1 
+			FROM projects child 
+			INNER JOIN Ancestors p ON p.id=child.parent_id
+			)
+			select u.login, p.identifier, p.id, p.parent_id, sum(te.hours) as s, min(spent_on)
+			from time_entries te, projects p, users u,
+				(SELECT prj.id prj_id, a.parent_id, a.level 
+				 FROM Ancestors a
+				 INNER JOIN Projects prj ON prj.id = a.id) as parent
 		    	where u.id = te.user_id 
 	    		  and te.project_id = p.id 
 			  and u.login = '%s'
 			  and p.status != 5
 			  and te.spent_on >= '%s'
-	    		group by u.login, p.identifier, p.id, parent_id;""" % (user, dateSince)
+	    		group by u.login, p.identifier, p.id, parent.parent_id;""" % (user, dateSince)
     
+		print sql 
+
 		cursor.execute(sql)
     		#cursor.execute(sql)
     		allTime = cursor.fetchall()
 
+
 		for row in allTime:
 			print row
 			#print "%s, %s, %d, %d, %f, %s" % (row[0], row['identifier'], row['id'], row['parent_id'], row['hours'], row['spent_on'])
+
+		print "\n\n\n"
 
 
 
