@@ -42,7 +42,32 @@ def main():
 
 
     allProjects = buildTopParent
+
+    for user in settings:
+	for client in settings[user]:
+		dateSince = settings[user][client]["since"].strftime('%Y-%m-%d')
+    		sql = """select u.login, p.identifier, p.id, p.parent_id, sum(te.hours) as s, min(spent_on)
+			from time_entries te, projects p, users u 
+		    	where u.id = te.user_id 
+	    		  and te.project_id = p.id 
+			  and u.login = '%s'
+			  and p.status != 5
+			  and te.spent_on >= '%s'
+	    		group by u.login, p.identifier, p.id, parent_id;""" % (user, dateSince)
+    
+		cursor.execute(sql)
+    		#cursor.execute(sql)
+    		allTime = cursor.fetchall()
+
+		for row in allTime:
+			print row
+			#print "%s, %s, %d, %d, %f, %s" % (row[0], row['identifier'], row['id'], row['parent_id'], row['hours'], row['spent_on'])
+
+
+
+
         
+    return
     
     # Number of hours per project spent since the beginning of time
     sql = """select u.login, p.identifier, p.id, p.parent_id, sum(te.hours) as s, min(spent_on)
@@ -60,7 +85,6 @@ def main():
 	#print "%s, %s, %d, %d, %f, %s" % (row[0], row['identifier'], row['id'], row['parent_id'], row['hours'], row['spent_on'])
 
 
-    exit
     
 
 if __name__ == "__main__":
