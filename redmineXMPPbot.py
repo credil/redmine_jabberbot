@@ -73,7 +73,7 @@ def main():
     cursor = conn.cursor()
     debug("Connected!\n")
 
-    sql = "select u.login, max(te.updated_on) from time_entries te, users u where u.id = te.user_id group by u.login order by max(te.updated_on);"
+    sql = "select u.login, max(te.updated_on) from time_entries te, users u where u.id = te.user_id and hours > 0 group by u.login order by max(te.updated_on);"
 
     cursor.execute(sql)
     data = cursor.fetchall()
@@ -105,13 +105,17 @@ def main():
     data = cursor.fetchall()
 
     hoursLoggedStr = ''
+    dateMin = datetime.date.max
     for row in data: 
+	if (row[2] < dateMin): 
+		dateMin = row[2] 
+
 	maker = row[0]
         if maker in firstNames:
 	    maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(row[1]) + ' (since ' + str(row[2]) + ')\n'
-
+	hoursLoggedStr += maker + ': ' + str(row[1])  + '\n'
+    hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 
 
     # Calculate hours per project, last 28 days
