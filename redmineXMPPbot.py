@@ -114,7 +114,7 @@ def main():
         if maker in firstNames:
 	    maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(row[1])  + '\n'
+	hoursLoggedStr += maker + ': ' + str(row[1])  + '   '
     hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 
 
