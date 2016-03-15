@@ -133,6 +133,7 @@ def main():
 
     # Now for the annoucements
     bot.join_room(chatroom, 'credilbot')
+    time.sleep(1)
     if lateUsers:
 	announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
 
