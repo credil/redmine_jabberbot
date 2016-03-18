@@ -4,3 +4,8 @@ redmine.code.sql*
 configMonthly.py*
 configChitra.py*
 thisQueryWorks.txt
+*.pyc
+*~
+scrap.py
+jtest.py
+testing_config.py
