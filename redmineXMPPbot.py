@@ -114,7 +114,7 @@ def main():
         if maker in firstNames:
 	    maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(row[1])  + '   '
+	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + '   '
     hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 
 
@@ -139,7 +139,7 @@ def main():
     bot.join_room(chatroom, 'credilbot')
     time.sleep(1)
     if lateUsers:
-	announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
+	announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +' hours)')
 
     announce('Total numbers of hours logged in last 7 days')
     announce(hoursLoggedStr)
