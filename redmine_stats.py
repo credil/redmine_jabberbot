@@ -124,7 +124,7 @@ def get_hours():
     # time.sleep(1)
     return_string = ""
     if lateUsers:
-        return_string += ', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')'
+        return_string += ', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +' hours)'
         return_string += '\n'
 	# announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
 
