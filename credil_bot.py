@@ -1,12 +1,16 @@
+#!/usr/bin/python2.7
+
 import sys
 import time
 from datetime import datetime, timedelta
+
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, REPL
 
 # import testing_config
 
 
 
-if(config.REPL):
+if(REPL):
     import threading
 
     # 'IPython' import to provide the REPL

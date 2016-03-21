@@ -98,7 +98,7 @@ def get_hours():
         if maker in firstNames:
 	    maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(row[1])  + '   '
+	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + '   '
     hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 
 
