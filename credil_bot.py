@@ -129,6 +129,7 @@ class CredilBot(JabberBot):
 credilbot = CredilBot( config.username, config.password)
 
 if __name__ == "__main__":
+    hour_log(credilbot, config.chatroom)
     if(config.REPL):
         credilbot.serve_forever(connect_callback = lambda: th.start())
     else:
