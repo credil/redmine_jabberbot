@@ -98,39 +98,62 @@ def main():
     
         # Number of hours per project spent last 28 days
 	debug("Doing %s..." % user)
-        sql = """select p.identifier, sum(te.hours) as s 
-    	from time_entries te, projects p, users u 
-    	    where u.login = '%s' 
-    	      and u.id = te.user_id 
-    	      and spent_on between now() - INTERVAL '28 days' and now() 
-    	      and te.project_id = p.id 
-    	    group by p.identifier 
-    	    order by s desc;""" % user
+        #sql = """select p.identifier, sum(te.hours) as s 
+    	#from time_entries te, projects p, users u 
+    	#    where u.login = '%s' 
+    	#      and u.id = te.user_id 
+    	#      and spent_on between now() - INTERVAL '28 days' and now() 
+    	#      and te.project_id = p.id 
+    	#    group by p.identifier 
+    	#    order by s desc;""" % user
     
-        cursor.execute(sql)
         #cursor.execute(sql)
-        data28days = cursor.fetchall()
+        ##cursor.execute(sql)
+        #data28days = cursor.fetchall()
     
     
-	#Number of hours per project spent since beginning of month
-	sql = ("select p.identifier, sum(te.hours) as s from time_entries te, projects p, users u "
-        "where u.login = 'jlam' and u.id = te.user_id  "
-        "  and spent_on between date_trunc('month', current_date) and now() "
-        "  and te.project_id = p.id "
-        "group by p.identifier "
-        "order by s desc; ")
+	##Number of hours per project spent since beginning of month
+	#sql = ("select p.identifier, sum(te.hours) as s from time_entries te, projects p, users u "
+        #"where u.login = 'jlam' and u.id = te.user_id  "
+        #"  and spent_on between date_trunc('month', current_date) and now() "
+        #"  and te.project_id = p.id "
+        #"group by p.identifier "
+        #"order by s desc; ")
     
 	sql = ("select p.identifier, sum(te.hours) as month, "\
 	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
 	"max(te.updated_on) as s "\
 	"from time_entries te, projects p, users u "\
-	"where u.login = 'jlam' and u.id = te.user_id "\
+	"where u.login = '%s' and u.id = te.user_id "\
 	"  and spent_on between date_trunc('month', current_date) and now()   "\
 	"  and te.project_id = p.id "\
 	"group by p.identifier "\
-	"order by s desc ")
+	"order by s desc ") % user
+
+	sql = """WITH RECURSIVE Ancestors AS (
+                        SELECT id, parent_id, 0 AS level 
+                            FROM projects WHERE parent_id IS NULL
+                        UNION ALL 
+                        SELECT child.id, child.parent_id, level+1 
+                            FROM projects child
+                            INNER JOIN Ancestors p ON p.id=child.parent_id
+                        )   
+                        select p2.identifier, sum(te.hours) as month, sum(case when spent_on = current_date then te.hours else 0 end) as today, max(te.updated_on) as s
+                        from time_entries te, projects p, users u, projects p2,
+                                (SELECT prj.id prj_id, a.parent_id, a.level
+                                 FROM Ancestors a
+                                 INNER JOIN Projects prj ON prj.id = a.id) as parent
+                        where u.id = te.user_id 
+                          and te.project_id = p.id 
+                          and u.login = '%s'
+                          and p.status != 5
+                          and te.spent_on between date_trunc('month', current_date) and now()
+                          and p.id = parent.prj_id 
+                          and parent.parent_id = p2.id
+                        group by p2.identifier;""" % (user)
+
     
-	#print sql
+	print sql
 
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
