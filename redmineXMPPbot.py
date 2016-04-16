@@ -99,7 +99,7 @@ def main():
 	
 
     # Calculate total hours
-    sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' group by u.login order by sum(hours);"
+    sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' and te.spent_on <= now() group by u.login order by sum(hours);"
 
     cursor.execute(sql)
     data = cursor.fetchall()
