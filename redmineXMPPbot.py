@@ -135,7 +135,7 @@ def main():
 
 
 
-    # Now for the annoucements
+    # Now for the announcements
     bot.join_room(chatroom, 'credilbot')
     time.sleep(1)
     if lateUsers:
