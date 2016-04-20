@@ -58,7 +58,7 @@ def working_hours():
     """
     # where monday == 0, sunday == 6
 
-    hour_start = 8
+    hour_start = 14 
     hour_end   = 18
     
     now=datetime.now()
@@ -103,7 +103,7 @@ class CredilBot(JabberBot):
             self.join_room(config.chatroom, config.username.split('@')[0])
 
         # schedule jobs 
-        schedule.every().hour.do(hour_log, self, config.chatroom) 
+        schedule.every(2).hours.do(hour_log, self, config.chatroom) 
         
 
     @botcmd
@@ -126,6 +126,7 @@ class CredilBot(JabberBot):
 
 
 ## setup bot        
+print "Connecting....."
 credilbot = CredilBot( config.username, config.password)
 
 if __name__ == "__main__":
