@@ -56,7 +56,7 @@ def working_hours():
     """
     # where monday == 0, sunday == 6
 
-    hour_start = 8
+    hour_start = 14 
     hour_end   = 18
     minute_min = 0
     minute_max = 10
@@ -127,7 +127,8 @@ class CredilBot(JabberBot):
         schedule.run_pending()  # run scheduled tasks
 
 
-## setup bot
+## setup bot        
+print "Connecting....."
 credilbot = CredilBot( config.username, config.password)
 
 if __name__ == "__main__":

@@ -90,15 +90,23 @@ def get_hours():
 
     hoursLoggedStr = ''
     dateMin = datetime.date.max
+    rosterCheck = dict(firstNames)
+    spaceStr = '   '  
     for row in data: 
 	if (row[2] < dateMin): 
 		dateMin = row[2] 
 
 	maker = row[0]
         if maker in firstNames:
+	    del rosterCheck[maker]
 	    maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + '   '
+
+	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + spaceStr
+
+    for firstName in rosterCheck:
+	hoursLoggedStr = firstName + ': 0' + spaceStr + hoursLoggedStr
+
     hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 
 
