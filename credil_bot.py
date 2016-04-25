@@ -56,14 +56,15 @@ def working_hours():
     """
     # where monday == 0, sunday == 6
 
-    hour_start = 14 
+    hour_start = 14
     hour_end   = 18
+    hour_report = [14, 16, 18]
     minute_min = 0
     minute_max = 10
 
     now=datetime.now()
     if(now.weekday() >= 0 and now.weekday() <= 4
-	and now.hour >= hour_start and now.hour <= hour_end
+	and now.hour in hour_report
     and now.minute >= minute_min and now.minute < minute_max):
         return True
     else:
@@ -72,12 +73,12 @@ def working_hours():
 
 ## scheduled jobs #####################################################################################
 
-def hour_log(bot, room):
+def hour_log(bot, room, skipHourCheck = False):
     """
     pass in the instance of the bot
     room is which room we are sending to. Idea being we might send to multiple rooms.
     """
-    if(working_hours()):
+    if(working_hours() or skipHourCheck == True):
         # message = "hello guys did you work today? %s" % datetime.now()
         chatroom = room
         message = redmine_stats.get_hours()
@@ -127,12 +128,12 @@ class CredilBot(JabberBot):
         schedule.run_pending()  # run scheduled tasks
 
 
-## setup bot        
+## setup bot
 print "Connecting....."
 credilbot = CredilBot( config.username, config.password)
 
 if __name__ == "__main__":
-    hour_log(credilbot, config.chatroom)
+    hour_log(credilbot, config.chatroom, True)
     if(config.REPL):
         credilbot.serve_forever(connect_callback = lambda: th.start())
     else:
