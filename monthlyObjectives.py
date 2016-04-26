@@ -12,6 +12,7 @@ from configMonthly import monthly
 
 class SystemInfoJabberBot(JabberBot):
     @botcmd
+
     def whoami(self, mess, args):
         """Tells you your username"""
         return mess.getFrom().getStripped()
@@ -48,9 +49,9 @@ def calcBuisnessDays(fromDay=1, untilDay=31, calcBuisnessDaysOnly=True):
             thisdate = date(now.year, now.month, i)
         except(ValueError):
             break
-        if thisdate.weekday() < 5 and thisdate not in holidays: # Monday == 0, Sunday == 6 
+        if thisdate.weekday() < 5 and thisdate not in holidays: # Monday == 0, Sunday == 6
             businessdays += 1
-    
+
     return businessdays
 
 
@@ -67,6 +68,59 @@ def dayFraction(beginHour = 9, endHour = 18):
 
 	debug(frac)
 	return frac
+
+
+def groupByTopParent(dataForMonth):
+
+    byTopParent = {}
+
+    for row in dataForMonth:
+       prjId        = row[0]
+       prjParentId  = row[1]
+       prjIdentifier= row[2]
+       hoursMonth   = row[3]
+       hoursToday   = row[4]
+       lastUpdate   = row[5]
+
+
+       # First, let's check if we aleady have a child in the byTopParent dictionary
+       # If we do, we have to agregate that data to our own
+       if prjId in byTopParent:
+           hoursMonth += byTopParent[prjId]['hoursMonth']
+           hoursToday += byTopParent[prjId]['hoursToday']
+           lastUpdate = max(lastUpdate, byTopParent[prjId]['lastUpdate'])
+
+           # Delete the child, because we have incorporated it
+           del byTopParent[prjId]
+
+       if prjParentId is not None:
+           prjId = prjParentId
+
+       if prjId not in byTopParent:
+           byTopParent[prjId] = {'identifier': prjIdentifier, 'hoursMonth': hoursMonth, 'hoursToday': hoursToday, 'lastUpdate': lastUpdate}
+       else:
+           byTopParent[prjId]['identifier'] = getIdentifier(prjId)
+           byTopParent[prjId]['hoursMonth'] += hoursMonth
+           byTopParent[prjId]['hoursToday'] += hoursToday
+           byTopParent[prjId]['lastUpdate'] = max(lastUpdate, byTopParent[prjId]['lastUpdate'])
+
+
+    return byTopParent
+
+
+
+
+
+def getIdentifier(prjId):
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    sql = "select identifier from projects where id = %d" % prjId;
+    cursor.execute(sql)
+    identifier = cursor.fetchone()[0]
+    return identifier
+
+
+
 
 
 root = logging.getLogger()
@@ -86,32 +140,32 @@ debug('Hello Julien, je suis connecte')
 def main():
     # print the connection string we will use to connect
     debug("Connecting to database...")
- 
+
     # get a connection, if a connect cannot be made an exception will be raised here
     conn = psycopg2.connect(conn_string)
- 
+
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     cursor = conn.cursor()
     debug("Connected!\n")
-        
+
     for (user, data) in monthly.items():
-    
+
         # Number of hours per project spent last 28 days
 	debug("Doing %s..." % user)
-        #sql = """select p.identifier, sum(te.hours) as s 
-    	#from time_entries te, projects p, users u 
-    	#    where u.login = '%s' 
-    	#      and u.id = te.user_id 
-    	#      and spent_on between now() - INTERVAL '28 days' and now() 
-    	#      and te.project_id = p.id 
-    	#    group by p.identifier 
+        #sql = """select p.identifier, sum(te.hours) as s
+    	#from time_entries te, projects p, users u
+    	#    where u.login = '%s'
+    	#      and u.id = te.user_id
+    	#      and spent_on between now() - INTERVAL '28 days' and now()
+    	#      and te.project_id = p.id
+    	#    group by p.identifier
     	#    order by s desc;""" % user
-    
+
         #cursor.execute(sql)
         ##cursor.execute(sql)
         #data28days = cursor.fetchall()
-    
-    
+
+
 	##Number of hours per project spent since beginning of month
 	#sql = ("select p.identifier, sum(te.hours) as s from time_entries te, projects p, users u "
         #"where u.login = 'jlam' and u.id = te.user_id  "
@@ -119,50 +173,31 @@ def main():
         #"  and te.project_id = p.id "
         #"group by p.identifier "
         #"order by s desc; ")
-    
-	sql = ("select p.identifier, sum(te.hours) as month, "\
+
+	sql = ("select p.id, p.parent_id, p.identifier, sum(te.hours) as month, "\
 	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
 	"max(te.updated_on) as s "\
 	"from time_entries te, projects p, users u "\
 	"where u.login = '%s' and u.id = te.user_id "\
 	"  and spent_on between date_trunc('month', current_date) and now()   "\
 	"  and te.project_id = p.id "\
-	"group by p.identifier "\
+	"group by p.id, p.identifier, p.parent_id "\
 	"order by s desc ") % user
 
-	sql = """WITH RECURSIVE Ancestors AS (
-                        SELECT id, parent_id, 0 AS level 
-                            FROM projects WHERE parent_id IS NULL
-                        UNION ALL 
-                        SELECT child.id, child.parent_id, level+1 
-                            FROM projects child
-                            INNER JOIN Ancestors p ON p.id=child.parent_id
-                        )   
-                        select p2.identifier, sum(te.hours) as month, sum(case when spent_on = current_date then te.hours else 0 end) as today, max(te.updated_on) as s
-                        from time_entries te, projects p, users u, projects p2,
-                                (SELECT prj.id prj_id, a.parent_id, a.level
-                                 FROM Ancestors a
-                                 INNER JOIN Projects prj ON prj.id = a.id) as parent
-                        where u.id = te.user_id 
-                          and te.project_id = p.id 
-                          and u.login = '%s'
-                          and p.status != 5
-                          and te.spent_on between date_trunc('month', current_date) and now()
-                          and p.id = parent.prj_id 
-                          and parent.parent_id = p2.id
-                        group by p2.identifier;""" % (user)
-
-    
 	print sql
 
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
-    
+
+        dataForMonth = groupByTopParent(dataForMonth)
+
 	#Build a hash from that
 	hoursWorked = {}
-	for row in dataForMonth:
-		hoursWorked[row[0]] = {'month' : float(row[1]), 'today' : float(row[2]), 'lastEntry' : row[3]}
-    
+	for id, row in dataForMonth.items():
+		hoursWorked[row['identifier']] = {'month' : float(row['hoursMonth']), 'today' : float(row['hoursToday']), 'lastEntry' : row['lastUpdate']}
+
+           #byTopParent[prjId] = {'identfier': prjIdentifier, 'hoursMonth': hoursMonth, 'hoursToday': hoursToday, 'lastUpdate': lastUpdate}
+
 
 	# Calculate date stuff
         now = datetime.now()
@@ -178,43 +213,43 @@ def main():
 
 
 	debug("Doing %s..." % user)
-     
+
     	allProjects = data.keys()
 	allProjects.append(hoursWorked.keys())
-		
+
 
 	# For each project
-	
+
 	notify(user, "%s, your hours for this month so far today" % user)
-	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0; 
+	deltaTotal = 0; deltaSpreadOutTotal = 0; remainingTodayTotal = 0;
     	workedTodayTotal = 0; deltaIncreaseTotal = 0; deltaForcastTotal = 0;
 	lastEntryMax = date(1, 1, 1); lastEntryMax = datetime.combine(lastEntryMax, datetime.min.time())
 	for(project, hoursPerWeekExpected) in data.items():
 		if project not in hoursWorked:
 			hoursWorked[project] = {'month' : 0, 'today' : 0, 'lastEntry' : datetime.now()}
 
-		### Calulate expected for 28 days: 
+		### Calulate expected for 28 days:
 		# (I actually don't care about last 28 days, so not doing it)
 		# But keeping the code in case I change my mind
 		#expected28[user][project] = hoursPerWeekExpected*(27+fraction)/weekday
-		
+
 		#Add worked today totals for reporting after the this for loop
 		workedTodayTotal += hoursWorked[project]['today']
 
 		#Calulate expected from beginning of month to today, end of day:
 		daysPerWeek = 5 if weekday else 7
 		expectedMonthUntilNow = hoursPerWeekExpected*float(buisnessDays-1+frac)/daysPerWeek
-		
+
 		#Generate the delta report
 		delta        = hoursWorked[project]['month'] - expectedMonthUntilNow
 		deltaTotal  += delta
 
 		#Forcast delta at end of month
         	deltaForcast         = delta * forecastRatio
-	        deltaForcastTotal   += deltaForcast 
-        
+	        deltaForcastTotal   += deltaForcast
 
-		#Detla spread out: if you wanted 0 delta by end of month, how much would 
+
+		#Detla spread out: if you wanted 0 delta by end of month, how much would
 		#you have to work on the remaining buisness days, including today
 		expectedMonthUntilYesterdayEOD = hoursPerWeekExpected*(buisnessDays-1)/daysPerWeek
 		expectedEndOfMonth = hoursPerWeekExpected*(float(buisnessDaysTotal))/daysPerWeek
@@ -232,23 +267,23 @@ def main():
 		lastEntry = hoursWorked[project]['lastEntry']
 		diff = datetime.now() - lastEntry
 		lastEntryMax = max(lastEntryMax, lastEntry)
-		
-		# To refresh average time entry, 
+
+		# To refresh average time entry,
 		# select login, avg(hours) as hours from time_entries te, users u where user_id = u.id and hours between 0 and 6 group by u.login order by hours;
-		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=0.83): 
+		if lastEntry.date() < datetime.today().date() or diff > timedelta(hours=0.83):
 			lastEntry = datetime.now()
 		eta = lastEntry  + timedelta(minutes=float(remainingToday)*60)
-			
+
 		# Print with more condensed format
 		reportStr = "{:s}: MTD delta: {:.1f} (Frcst: {:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(project,  delta, deltaForcast, hoursWorked[project]['today'], deltaSpreadOut, deltaIncrease, eta)
-		notify(user, reportStr) 
+		notify(user, reportStr)
 
 	diff = datetime.now() - lastEntryMax
-	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27): 
+	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27):
 		lastEntryMax = datetime.now()
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
 	reportStr = "Total: MTD delta: {:.1f} (Frcst: {:.1f}); Today: {:.1f}/{:.1f} ({:+.1f}); End: {:%H:%M}".format(deltaTotal, deltaForcastTotal, workedTodayTotal, deltaSpreadOutTotal, deltaIncreaseTotal, eta)
-	notify(user, reportStr) 
+	notify(user, reportStr)
 
 	notify(user, "See %s for documentation" % docURL)
 	notify(user, "Bye\n")
