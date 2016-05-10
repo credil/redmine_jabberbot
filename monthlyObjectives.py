@@ -33,7 +33,7 @@ def notify(redmineUser, message):
 	bot.send(xmppUser, message)
 	time.sleep(1)
 
-# count buisness days from fromDay to untilDay inclusively
+# count business days from fromDay to untilDay inclusively
 def calcBuisnessDays(fromDay=1, untilDay=31, calcBuisnessDaysOnly=True):
 
     if not calcBuisnessDaysOnly:
@@ -214,14 +214,14 @@ def main():
 	        deltaForcastTotal   += deltaForcast 
         
 
-		#Detla spread out: if you wanted 0 delta by end of month, how much would 
-		#you have to work on the remaining buisness days, including today
+		#Delta spread out: if you wanted 0 delta by end of month, how much would
+		#you have to work on the remaining business days, including today
 		expectedMonthUntilYesterdayEOD = hoursPerWeekExpected*(buisnessDays-1)/daysPerWeek
 		expectedEndOfMonth = hoursPerWeekExpected*(float(buisnessDaysTotal))/daysPerWeek
 		deltaSpreadOut = (expectedEndOfMonth - (float(hoursWorked[project]['month']) - float(hoursWorked[project]['today'])))/float(buisnessDaysRemaining)
 		deltaSpreadOutTotal += deltaSpreadOut
 
-		#Detla increase: If you stopped working now, how much would your delta spread out increase by
+		#Delta increase: If you stopped working now, how much would your delta spread out increase by
 		deltaIncrease = (deltaSpreadOut - hoursWorked[project]['today'])/max(buisnessDaysRemaining-1,1)
 		deltaIncreaseTotal += deltaIncrease
 
