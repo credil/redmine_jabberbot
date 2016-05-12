@@ -72,40 +72,82 @@ def dayFraction(beginHour = 9, endHour = 18):
 
 def groupByTopParent(dataForMonth):
 
+    debug("Grouping by top parent...")
+
     byTopParent = {}
+    topParentMap = buildTopParentMap()
 
     for row in dataForMonth:
        prjId        = row[0]
-       prjParentId  = row[1]
+       #prjParentId  = row[1]
        prjIdentifier= row[2]
        hoursMonth   = row[3]
        hoursToday   = row[4]
        lastUpdate   = row[5]
 
+       topParent = topParentMap[prjId]
 
        # First, let's check if we aleady have a child in the byTopParent dictionary
        # If we do, we have to agregate that data to our own
-       if prjId in byTopParent:
-           hoursMonth += byTopParent[prjId]['hoursMonth']
-           hoursToday += byTopParent[prjId]['hoursToday']
-           lastUpdate = max(lastUpdate, byTopParent[prjId]['lastUpdate'])
+       #if topParent in byTopParent:
+       #    hoursMonth += byTopParent[prjId]['hoursMonth']
+       #    hoursToday += byTopParent[prjId]['hoursToday']
+       #    lastUpdate = max(lastUpdate, byTopParent[prjId]['lastUpdate'])
 
-           # Delete the child, because we have incorporated it
-           del byTopParent[prjId]
+       #    # Delete the child, because we have incorporated it
+       #    del byTopParent[prjId]
 
-       if prjParentId is not None:
-           prjId = prjParentId
+       #if prjParentId is not None:
+       #    prjId = prjParentId
 
-       if prjId not in byTopParent:
-           byTopParent[prjId] = {'identifier': prjIdentifier, 'hoursMonth': hoursMonth, 'hoursToday': hoursToday, 'lastUpdate': lastUpdate}
+
+       if topParent is None or topParent not in byTopParent:
+           paIdentifier = getIdentifier(topParent)
+           byTopParent[topParent] = {'identifier': paIdentifier, 'hoursMonth': hoursMonth, 'hoursToday': hoursToday, 'lastUpdate': lastUpdate}
        else:
-           byTopParent[prjId]['identifier'] = getIdentifier(prjId)
-           byTopParent[prjId]['hoursMonth'] += hoursMonth
-           byTopParent[prjId]['hoursToday'] += hoursToday
-           byTopParent[prjId]['lastUpdate'] = max(lastUpdate, byTopParent[prjId]['lastUpdate'])
+           byTopParent[topParent]['hoursMonth'] += hoursMonth
+           byTopParent[topParent]['hoursToday'] += hoursToday
+           byTopParent[topParent]['lastUpdate'] = max(lastUpdate, byTopParent[topParent]['lastUpdate'])
 
 
     return byTopParent
+
+
+
+
+def buildTopParentMap():
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    debug("Building top parent map...")
+    topParentMap = {}
+    sql = "select id, parent_id from projects;"
+    cursor.execute(sql)
+    prjParents = cursor.fetchall()
+
+    for row in prjParents:
+        id   = row[0]
+        paId = row[1]
+
+        finalParent = None
+
+        # First lets look at ourselve, see if we have a parent
+        if paId is None:
+            finalParent = id
+        else:
+            finalParent = paId
+
+        # Lets look at our parent, see if their top parent has been determined
+        if paId in topParentMap and topParentMap[paId] is not None:
+            finalParent = topParentMap[paId]
+
+        topParentMap[id] = finalParent
+
+        for childId, childParentId in topParentMap.items():
+            if childParentId == id:
+                topParentMap[childId] = finalParent
+
+    return topParentMap
+
 
 
 
@@ -132,6 +174,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 root.addHandler(ch)
 
+debug('Python script starting....')
 
 bot = SystemInfoJabberBot(username,password)
 debug('Hello Julien, je suis connecte')
