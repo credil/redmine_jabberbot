@@ -1,4 +1,4 @@
-*Implement yml parser for db user credentials
+*Implement YML parser for DB user credentials
 *Put total hours on one line - since 2015-04-23: Julien: 21.6/40, Michael 26.9/40, ...
 *msg this number, once a day, directly to people.
 *make bot stay in chatroom

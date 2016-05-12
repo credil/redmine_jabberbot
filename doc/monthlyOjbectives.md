@@ -25,11 +25,11 @@ The script will assume the last time entry is the current time if:
 * There were no time entries for that project today
 * The last time entry for that project was made 0.83 hours or more before the current time:
 
-At the time of this writting, there are no banks that are taken into account when doing calculations.
+At the time of this writing, there are no banks that are taken into account when doing calculations.
 
-## Deltas: postive, negative?
-* For a delta >0: the redmine user is ahead of hours expected; 
-* For a delta <0: the redmine user needs do this many hours today to keep end of month estimates on expected target
+## Deltas: positive, negative?
+* For a delta >0: the Redmine user is ahead of hours expected;
+* For a delta <0: the Redmine user needs do this many hours today to keep end of month estimates on expected target
 
 ## FAQ 
 ### If I did the all the hours for today indicated by the script, why is the delta still negative?
