@@ -102,10 +102,10 @@ output=/tmp/$__base.tsv
 
 $__dir/chitra.py | tee $output
 
-msg="Banque pour les makers `ds.bash '/'`"
+msg="Banque pour les makers `~jlam/bin/ds.bash '/'`"
 
 
-echo $msg  | mutt -a $output -s "$msg" -- "jlam@credil.org, crm@credil.org"
+echo $msg  | mutt -a $output -s "$msg" -- "jlam@credil.org, crm@credil.org, jason@credil.org"
 
 set +x
 
