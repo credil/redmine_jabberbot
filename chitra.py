@@ -92,7 +92,7 @@ def main():
     print "Positive bank means maker ahead.  Negative means maker owes hours."
     print "All units in hours"
     print "The bank is calculated as bank = hoursSince - (hoursShouldHaveSince - bankAtStart)"
-    print "Hours counted are until %s" % dateUntil.strftime('%Y-%m-%d')
+    print "Hours counted are until %s exclusively" % dateUntil.strftime('%Y-%m-%d')
 
 
 
