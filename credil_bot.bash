@@ -21,6 +21,14 @@ ts=`date +'%Y%m%d-%H%M%S'`
 #Set the config file
 configFile="$HOME/.binJlam/templateConfig"
 
+#Capture everything to log
+mkdir -p ~/log
+log=~/log/$__base-${ts}.log
+exec >  >(tee -a $log)
+exec 2> >(tee -a $log >&2)
+touch $log
+chmod 600 $log
+
 #=== BEGIN Unique instance ============================================
 #Ensure only one copy is running
 pidfile=$HOME/.${__base}.pid
@@ -43,14 +51,6 @@ echo ${pid} > ${pidfile}
 trap "rm -f $pidfile" INT QUIT TERM EXIT
 #=== END Unique instance ============================================
 
-
-#Capture everything to log
-mkdir -p ~/log
-log=~/log/$__base-${ts}.log
-exec >  >(tee -a $log)
-exec 2> >(tee -a $log >&2)
-touch $log
-chmod 600 $log
 
 
 #Check that the config file exists
