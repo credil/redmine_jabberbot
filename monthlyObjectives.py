@@ -90,6 +90,43 @@ bot = SystemInfoJabberBot(username,password)
 debug('Hello Julien, je suis connecte')
 
 
+
+def goReport(user):
+    ### Determine first if there was a new time entry and thus we should report time
+    lastEntryAtLastPassPath = "/tmp/monthlyObjecttives.%s.lastEntry.txt" % user
+
+    doContinue = False
+    doUpdate = False
+
+    lastEntryForUserStr = lastTimeEntry(user).strftime("%Y/%m/%d %H:%M")
+    if not os.path.isfile(lastEntryAtLastPassPath):
+        doContinue = True
+    else:
+        content = ''
+        with open(lastEntryAtLastPassPath, 'r') as content_file:
+                content = content_file.read()
+
+        if lastEntryForUserStr != content:
+            doContinue = True
+        elif time.time() - os.path.getmtime(lastEntryAtLastPassPath) > 2*60*60:
+            hour_start = 11
+            hour_end   = 18
+            now=datetime.now()
+            if  now.weekday() >= 0 and now.weekday() <= 4 and now.hour >= hour_start and now.hour < hour_end:
+                doUpdate = True
+                os.utime(lastEntryAtLastPassPath, None)
+
+
+
+
+    if doContinue:
+        f = open(lastEntryAtLastPassPath, 'w')
+        f.write(lastEntryForUserStr)
+        f.close
+
+    return doContinue or doUpdate
+
+
 def main():
     # print the connection string we will use to connect
     debug("Connecting to database...")
@@ -103,45 +140,25 @@ def main():
 
     for (user, data) in monthly.items():
 
-
-        ### Determine first if there was a new time entry and thus we should report time
-        lastEntryAtLastPassPath = "/tmp/monthlyObjecttives.%s.lastEntry.txt" % user
-
-        doContinue = False
-
-        lastEntryForUserStr = lastTimeEntry(user).strftime("%Y/%m/%d %H:%M")
-        if not os.path.isfile(lastEntryAtLastPassPath):
-            doContinue = True
-        else:
-            content = ''
-            with open(lastEntryAtLastPassPath, 'r') as content_file:
-                    content = content_file.read()
-
-            if lastEntryForUserStr != content:
-                doContinue = True
-
-        if doContinue:
-            f = open(lastEntryAtLastPassPath, 'w')
-            f.write(lastEntryForUserStr)
-            f.close
-        else:
+        if goReport(user) == False:
             debug("Skipping %s cause already reported, no new time entry" % user)
             continue
 
-    ### Now continue reporting for that user
-	debug("Doing %s..." % user)
-	##Number of hours per project spent since beginning of month
-	sql = ("select p.id, p.parent_id, p.identifier, sum(te.hours) as month, "\
-	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
-	"max(te.updated_on) as s "\
-	"from time_entries te, projects p, users u "\
-	"where u.login = '%s' and u.id = te.user_id "\
-	"  and spent_on between date_trunc('month', current_date) and now()   "\
-	"  and te.project_id = p.id "\
-	"group by p.id, p.identifier, p.parent_id "\
-	"order by s desc ") % user
 
-	print sql
+        ### Now continue reporting for that user
+    	debug("Doing %s..." % user)
+    	##Number of hours per project spent since beginning of month
+    	sql = ("select p.id, p.parent_id, p.identifier, sum(te.hours) as month, "\
+    	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
+    	"max(te.updated_on) as s "\
+    	"from time_entries te, projects p, users u "\
+    	"where u.login = '%s' and u.id = te.user_id "\
+    	"  and spent_on between date_trunc('month', current_date) and now()   "\
+    	"  and te.project_id = p.id "\
+    	"group by p.id, p.identifier, p.parent_id "\
+    	"order by s desc ") % user
+
+    	print sql
 
         cursor.execute(sql, (user))
         dataForMonth = cursor.fetchall()
