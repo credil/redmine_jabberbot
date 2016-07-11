@@ -99,6 +99,16 @@ def groupByTopParentChitra(dataSums, ignore = None):
     return byTopParent
 
 
+def lastTimeEntry(user):
+    sql = "select max(te.updated_on) from time_entries te, users u where u.login = '%s' and te.user_id = u.id" % user
+
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    maxTimeEntry = cursor.fetchone()[0]
+    return maxTimeEntry
+
+
 def getIdentifier(prjId):
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()

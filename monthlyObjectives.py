@@ -6,7 +6,8 @@ import pprint
 import psycopg2
 import sys
 import time;
-from redmine_stats import groupByTopParent
+from redmine_stats import groupByTopParent, lastTimeEntry
+import os.path
 
 from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, docURL
 from configMonthly import monthly
@@ -102,30 +103,34 @@ def main():
 
     for (user, data) in monthly.items():
 
-        # Number of hours per project spent last 28 days
+
+        ### Determine first if there was a new time entry and thus we should report time
+        lastEntryAtLastPassPath = "/tmp/monthlyObjecttives.%s.lastEntry.txt" % user
+
+        doContinue = False
+
+        lastEntryForUserStr = lastTimeEntry(user).strftime("%Y/%m/%d %H:%M")
+        if not os.path.isfile(lastEntryAtLastPassPath):
+            doContinue = True
+        else:
+            content = ''
+            with open(lastEntryAtLastPassPath, 'r') as content_file:
+                    content = content_file.read()
+
+            if lastEntryForUserStr != content:
+                doContinue = True
+
+        if doContinue:
+            f = open(lastEntryAtLastPassPath, 'w')
+            f.write(lastEntryForUserStr)
+            f.close
+        else:
+            debug("Skipping %s cause already reported, no new time entry" % user)
+            continue
+
+    ### Now continue reporting for that user
 	debug("Doing %s..." % user)
-        #sql = """select p.identifier, sum(te.hours) as s
-    	#from time_entries te, projects p, users u
-    	#    where u.login = '%s'
-    	#      and u.id = te.user_id
-    	#      and spent_on between now() - INTERVAL '28 days' and now()
-    	#      and te.project_id = p.id
-    	#    group by p.identifier
-    	#    order by s desc;""" % user
-
-        #cursor.execute(sql)
-        ##cursor.execute(sql)
-        #data28days = cursor.fetchall()
-
-
 	##Number of hours per project spent since beginning of month
-	#sql = ("select p.identifier, sum(te.hours) as s from time_entries te, projects p, users u "
-        #"where u.login = 'jlam' and u.id = te.user_id  "
-        #"  and spent_on between date_trunc('month', current_date) and now() "
-        #"  and te.project_id = p.id "
-        #"group by p.identifier "
-        #"order by s desc; ")
-
 	sql = ("select p.id, p.parent_id, p.identifier, sum(te.hours) as month, "\
 	"sum(case when spent_on = current_date then te.hours else 0 end) as today, "\
 	"max(te.updated_on) as s "\
