@@ -115,6 +115,10 @@ def goReport(user):
             if  now.weekday() >= 0 and now.weekday() <= 4 and now.hour >= hour_start and now.hour < hour_end:
                 doUpdate = True
                 os.utime(lastEntryAtLastPassPath, None)
+            else:
+                debug("Skipping %s cause no new time entry and not in announce time" % user)
+        else:
+            debug("Skipping %s cause already reported, no new time entry and last announce too recent" % user)
 
 
 
@@ -141,7 +145,6 @@ def main():
     for (user, data) in monthly.items():
 
         if goReport(user) == False:
-            debug("Skipping %s cause already reported, no new time entry" % user)
             continue
 
 
