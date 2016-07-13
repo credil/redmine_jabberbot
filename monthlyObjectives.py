@@ -91,6 +91,19 @@ debug('Hello Julien, je suis connecte')
 
 
 
+"""
+Determine if we are within normal updating times
+"""
+def inAnnounceTime():
+    hour_start = 11
+    hour_end   = 18
+    now=datetime.now()
+    if  now.weekday() >= 0 and now.weekday() <= 4 and now.hour >= hour_start and now.hour < hour_end:
+        return True
+    else:
+        return False
+
+
 def goReport(user):
     ### Determine first if there was a new time entry and thus we should report time
     lastEntryAtLastPassPath = "/tmp/monthlyObjecttives.%s.lastEntry.txt" % user
@@ -98,7 +111,8 @@ def goReport(user):
     doContinue = False
     doUpdate = False
 
-    lastEntryForUserStr = lastTimeEntry(user).strftime("%Y/%m/%d %H:%M")
+    lastEntryForUser    = lastTimeEntry(user)
+    lastEntryForUserStr = lastEntryForUser.strftime("%Y/%m/%d %H:%M")
     if not os.path.isfile(lastEntryAtLastPassPath):
         doContinue = True
     else:
@@ -106,19 +120,26 @@ def goReport(user):
         with open(lastEntryAtLastPassPath, 'r') as content_file:
                 content = content_file.read()
 
+        secsSinceLastEntry  = float(lastEntryForUser.strftime("%s")) - os.path.getmtime(lastEntryAtLastPassPath)
+        secsSinceLastAnnounce = time.time() - os.path.getmtime(lastEntryAtLastPassPath)
+
+        """
+        Update if:
+        - A new time entry has been made, at any time
+        - If we are in announce time:
+          - If it has been at least 6 hours since the last entry and 5 minutes since the last announce
+          - If it has been 2 hours since the last announce
+        """
         if lastEntryForUserStr != content:
             doContinue = True
-        elif time.time() - os.path.getmtime(lastEntryAtLastPassPath) > 2*60*60:
-            hour_start = 11
-            hour_end   = 18
-            now=datetime.now()
-            if  now.weekday() >= 0 and now.weekday() <= 4 and now.hour >= hour_start and now.hour < hour_end:
+        elif inAnnounceTime():
+            if (secsSinceLastEntry > 6*60*60 and secsSinceLastAnnounce > 5*60) or secsSinceLastAnnounce > 2*60*60:
                 doUpdate = True
                 os.utime(lastEntryAtLastPassPath, None)
             else:
-                debug("Skipping %s cause no new time entry and not in announce time" % user)
+                debug("Skipping %s cause last announcement too soon, " % user)
         else:
-            debug("Skipping %s cause already reported, no new time entry and last announce too recent" % user)
+            debug("Skipping %s cause last entry reported and we are not in announce time, " % user)
 
 
 
