@@ -104,8 +104,9 @@ def inAnnounceTime():
         return False
 
 
+### Determine first if there was a new time entry, how old was the last annoucement
+### and thus we should report time
 def goReport(user):
-    ### Determine first if there was a new time entry and thus we should report time
     lastEntryAtLastPassPath = "/tmp/monthlyObjecttives.%s.lastEntry.txt" % user
 
     doContinue = False
@@ -120,7 +121,7 @@ def goReport(user):
         with open(lastEntryAtLastPassPath, 'r') as content_file:
                 content = content_file.read()
 
-        secsSinceLastEntry  = float(lastEntryForUser.strftime("%s")) - os.path.getmtime(lastEntryAtLastPassPath)
+        secsSinceLastEntry  = time.time() - float(lastEntryForUser.strftime("%s"))
         secsSinceLastAnnounce = time.time() - os.path.getmtime(lastEntryAtLastPassPath)
 
         """
