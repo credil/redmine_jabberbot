@@ -100,7 +100,8 @@ set -o xtrace
 
 output=/tmp/$__base.tsv
 
-$__dir/chitra.py | tee $output
+
+$__dir/chitra.py `date +"%Y-%m-%d"`| tee $output
 
 msg="Banque pour les makers `~jlam/bin/ds.bash '/'`"
 

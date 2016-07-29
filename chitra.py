@@ -31,9 +31,13 @@ def main():
     #debug("Connected!\n")
 
 
-    bankTable = "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Maker", "Client", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start")
     noticeTable = 'Notice for projects ignored or not set'+"\n"
     dateUntil = first_day_of_month(datetime.datetime.now())
+    if sys.argv[1:]:
+        dateUntil = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d')
+        dateUntil = dateUntil.date()
+
+    bankTable = "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Maker", "Client", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start")
     for user in settings:
         allClients   = set()
         checkedClients      = set()
