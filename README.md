@@ -11,7 +11,7 @@ Per user customizable thresholds as well.  The bot is configured to nag in a XMP
 
 # monthlyObjectives
 
-monthlyObjectives messages a user privately (via XMPP) to give the number of hours needed to bill today to reach a monthly objectives.  See [[doc/monthlyOjbectives.md]] .
+monthlyObjectives messages a user privately (via XMPP) to give the number of hours needed to bill today to reach a monthly objectives.  See https://github.com/credil/redmine_jabberbot/blob/master/doc/monthlyOjbectives.md
 
 # chitra
 
