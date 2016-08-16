@@ -15,4 +15,4 @@ monthlyObjectives messages a user privately to give the number of hours needed t
 
 # chitra
 
-Chitra is keeping tabs on hour banks.  Calculates number of hours billed since a specified begin date and calculates if the redmine user is ahead or behind.
+Chitra is keeps tabs on hour banks.  It calculates the number of hours billed since a specified begin date and calculates if the redmine user is ahead or behind.
