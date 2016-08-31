@@ -276,6 +276,7 @@ def main():
 	if lastEntryMax.date() < datetime.today().date() or diff > timedelta(hours=1.27):
 		lastEntryMax = datetime.now()
 	eta = lastEntryMax  + timedelta(minutes=float(remainingTodayTotal)*60)
+    #start = datetime.datetime.now().time() - timedelta(minutes=float(workedTotalTotal)*60)
 	reportStr = "Today, {:s} did {:.1f} of {:.1f} hours and, if he does not stop billing, is expected to reach that target at {:%H:%M}".format(userQuery, workedTodayTotal, deltaSpreadOutTotal, eta)
 
     print reportStr
