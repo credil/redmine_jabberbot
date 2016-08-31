@@ -37,7 +37,7 @@ def main():
         dateUntil = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d')
         dateUntil = dateUntil.date()
 
-    bankTable = "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Maker", "Client", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start")
+    bankTable = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Maker", "Client", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start", "Hours worked/week")
     for user in settings:
         allClients   = set()
         checkedClients      = set()
@@ -79,7 +79,7 @@ def main():
             for key, row in allTime.items():
                 allClients.add(key)
 
-            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\n" % (user, client, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank)
+            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\t%.1f\n" % (user, client, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank, hoursSince/weeksSince)
 
 
             if settings[user][client]['ignore']:
@@ -102,22 +102,6 @@ def main():
 
 
     return
-
-    # Number of hours per project spent since the beginning of time
-    sql = """select u.login, p.identifier, p.id, p.parent_id, sum(te.hours) as s, min(spent_on)
-    from time_entries te, projects p, users u
-        where u.id = te.user_id
-          and te.project_id = p.id
-        group by u.login, p.identifier, p.id, parent_id;"""
-
-    cursor.execute(sql)
-    #cursor.execute(sql)
-    allTime = cursor.fetchall()
-
-    for row in allTime:
-        print row
-    #print "%s, %s, %d, %d, %f, %s" % (row[0], row['identifier'], row['id'], row['parent_id'], row['hours'], row['spent_on'])
-
 
 
 
