@@ -251,7 +251,10 @@ def get_hours():
     return_string = ""
     if lateUsers:
         return_string += ', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +' hours)'
-        return_string += '\n'
+    else:
+        return_string += 'Congrats everyone for logging your hours today!!!'
+    return_string += '\n'
+
 	# announce(', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +')')
 
     return_string +='Total numbers of hours logged in last 7 days\n'
