@@ -48,7 +48,7 @@ formerDir=`pwd`
 # http://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 
 #Set the config file
-configFile="$HOME/.binJlam/templateConfig"
+configFile="$HOME/.$__base.conf"
 
 #=== BEGIN Unique instance ============================================
 #Ensure only one copy is running
@@ -82,10 +82,12 @@ chmod 600 $log
 
 
 #Check that the config file exists
-#if [[ ! -f "$configFile" ]] ; then
-#        echo "I need a file at $configFile with ..."
-#        exit 1
-#fi
+if [[ ! -f "$configFile" ]] ; then
+        echo "I need a file at $configFile with the email addresses to send do, seperated by comma, optionally space"
+        echo "Ex:"
+        echo "jlam@credil.org, crm@credil.org, jason@credil.org"
+        exit 1
+fi
 
 export DISPLAY=:0
 
@@ -106,7 +108,7 @@ $__dir/chitra.py `date +"%Y-%m-%d"`| tee $output
 msg="Banque pour les makers `~jlam/bin/ds.bash '/'`"
 
 
-echo $msg  | mutt -a $output -s "$msg" -- "jlam@credil.org, crm@credil.org, jason@credil.org"
+echo $msg  | mutt -a $output -s "$msg" -- "`cat $configFile`"
 
 set +x
 
