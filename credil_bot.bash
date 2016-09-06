@@ -84,7 +84,7 @@ set +x
 ### END SCIPT ##################################################################
 
 END=$(date +%s.%N)
-DIFF=$(echo "round($END - $START)" | bc)
+DIFF=$(echo "$END - $START" | bc)
 echo; echo; echo;
 echo Done.  `date` - $DIFF seconds
 

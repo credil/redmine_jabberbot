@@ -249,7 +249,7 @@ def get_hours():
     # bot.join_room(chatroom, 'credilbot')
     # time.sleep(1)
     return_string = ""
-    if lateUsers:
+    if len(lateUsers) > 0:
         return_string += ', '.join(lateUsers) + ' have not logged time within their set threshold (default '+ str(thresholdDefault) +' hours)'
     else:
         return_string += 'Congrats everyone for logging your hours today!!!'
