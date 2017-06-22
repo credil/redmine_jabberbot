@@ -6,7 +6,7 @@ import psycopg2
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, thresholdDefault
 
 connected = False
 
@@ -15,7 +15,7 @@ def announce(message):
     debug('Trying to announce in ' + chatroom + ': ' + message)
     bot.send(chatroom, message, None, 'groupchat')
     time.sleep(1)
-    
+
 def debug(message):
     print message
     #bot.send(adminuser, message)
@@ -61,14 +61,12 @@ debug('Hello Julien, je suis connecte')
 
 
 def main():
-    thresholdDefault = 4
-
     # print the connection string we will use to connect
     debug("Connecting to database...")
- 
+
     # get a connection, if a connect cannot be made an exception will be raised here
     conn = psycopg2.connect(conn_string)
- 
+
     # conn.cursor will return a cursor object, you can use this cursor to perform queries
     cursor = conn.cursor()
     debug("Connected!\n")
@@ -80,13 +78,13 @@ def main():
 
     # Calculate late users first
     lateUsers = []
-    for row in data: 
+    for row in data:
         hoursSinceLastLog = (datetime.datetime.now() - row[1]).total_seconds() / 60 / 60
 	debug(str(row) + ' ' + str(hoursSinceLastLog))
 
 	redmineHandle = row[0]
-	
-	threshold = thresholdDefault; 
+
+	threshold = thresholdDefault;
 	if redmineHandle in userConfig and 'threshold' in userConfig[redmineHandle]:
 	    threshold = userConfig[row[0]]['threshold']
 
@@ -96,7 +94,7 @@ def main():
 		maker = xmppHandles[maker]
  	    #lateUsers.append(maker + ' (' + str(round(hoursSinceLastLog, 1)) + ' > ' + str(threshold) + ')');
  	    lateUsers.append(maker)
-	
+
 
     # Calculate total hours
     sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' and te.spent_on <= now() group by u.login order by sum(hours);"
@@ -106,9 +104,9 @@ def main():
 
     hoursLoggedStr = ''
     dateMin = datetime.date.max
-    for row in data: 
-	if (row[2] < dateMin): 
-		dateMin = row[2] 
+    for row in data:
+	if (row[2] < dateMin):
+		dateMin = row[2]
 
 	maker = row[0]
         if maker in firstNames:
@@ -125,7 +123,7 @@ def main():
     data = cursor.fetchall()
 
     hoursLast28days = ''
-    for row in data: 
+    for row in data:
 	maker = row[0]
         if maker in firstNames:
 	    maker = firstNames[maker]
@@ -143,13 +141,13 @@ def main():
 
     announce('Total numbers of hours logged in last 7 days')
     announce(hoursLoggedStr)
-	
+
 
 
 if __name__ == "__main__":
     main()
 
-#while 1: 
+#while 1:
 #	debug(str(datetime.datetime.now()))
 #	time.sleep(5)
 
