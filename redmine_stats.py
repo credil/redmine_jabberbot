@@ -9,7 +9,7 @@ import logging
 import sys
 import time;
 
-from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames
+from config import username, password, chatroom, adminuser, ignoreUsers, xmppHandles, userConfig, conn_string, firstNames, thresholdDefault
 
 connected = False
 
@@ -158,8 +158,6 @@ def buildTopParentMap():
 
 
 def get_hours():
-    thresholdDefault = 4
-
     # print the connection string we will use to connect
     debug("Connecting to database...")
 
