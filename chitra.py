@@ -19,6 +19,12 @@ def debug(message):
 def first_day_of_month(d):
     return date(d.year, d.month, 1)
 
+def divide_safe(a,  b):
+    if b == 0:
+        return a
+    else:
+        return a / b
+
 def main():
     # print the connection string we will use to connect
     #debug("Connecting to database...")
@@ -79,7 +85,7 @@ def main():
             for key, row in allTime.items():
                 allClients.add(key)
 
-            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\t%.1f\n" % (user, client, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank, hoursSince/weeksSince)
+            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\t%.1f\n" % (user, client, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank, divide_safe(hoursSince, weeksSince))
 
 
             if settings[user][client]['ignore']:
