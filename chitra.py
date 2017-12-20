@@ -53,14 +53,14 @@ def main():
 
             ### We gather this inside the loop because dateSince varies on a per client basis
             sql = """
-            select p.identifier, p.id, sum(te.hours) as s, min(spent_on)
+            select p.identifier, p.id, sum(te.hours) as s, min(spent_on), mail
             from time_entries te, projects p, users u
                 where u.id = te.user_id
                   and te.project_id = p.id
                   and u.login = '%s'
                   and p.status != 5
                   and te.spent_on between '%s' and '%s'
-                group by u.login, p.identifier, p.id; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
+                group by u.login, mail, p.identifier, p.id; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
 
             sys.stderr.write(sql)
 
