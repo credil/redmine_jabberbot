@@ -43,7 +43,8 @@ def main():
         dateUntil = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d')
         dateUntil = dateUntil.date()
 
-    bankTable = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Maker", "Client", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start", "Hours worked/week")
+    bankTable = ''
+    bankTableHeader = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % ("Client", "Maker", "Bank", "Since",  "Work done since", "Work should have done since", "Bank at start", "Hours worked/week")
     for user in settings:
         allClients   = set()
         checkedClients      = set()
@@ -60,7 +61,7 @@ def main():
                   and u.login = '%s'
                   and p.status != 5
                   and te.spent_on between '%s' and '%s'
-                group by u.login, p.identifier, p.id; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
+                group by p.identifier, p.id, u.login; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
 
             sys.stderr.write(sql)
 
@@ -85,7 +86,8 @@ def main():
             for key, row in allTime.items():
                 allClients.add(key)
 
-            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\t%.1f\n" % (user, client, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank, divide_safe(hoursSince, weeksSince))
+            # Generate string containing table data
+            bankTable = bankTable + "%s\t%s\t% .2f\t%s\t%.2f\t%.2f\t%.2f\t%.1f\n" % (client, user, hoursSince - (hoursShouldHaveSince - bank), since, hoursSince, hoursShouldHaveSince, bank, divide_safe(hoursSince, weeksSince))
 
 
             if settings[user][client]['ignore']:
@@ -95,7 +97,10 @@ def main():
         if nonCheckedClients:
             noticeTable = noticeTable + "%s\t%s\t%s\n" % (user, "Not set", "\t".join(nonCheckedClients))
 
-    print bankTable
+
+    print bankTableHeader
+    print "\n".join(sorted(bankTable.split("\n")))
+    #print bankTable
     print
     print noticeTable
 
