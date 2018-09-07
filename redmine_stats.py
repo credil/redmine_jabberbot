@@ -198,6 +198,17 @@ def get_hours():
  	    lateUsers.append(maker)
 
 
+    # Calculate last logged date (reported if user has logged 0 hours in last 7 days)
+    honestLogTH_inHours = 1
+    sql = "select u.login, max(te.updated_on) last_entry from time_entries te, users u where u.status = 1 and u.id = te.user_id and hours > %f group by u.login order by max(te.updated_on);" % honestLogTH_inHours
+
+    cursor.execute(sql)
+    lastHonestLog = {}
+    for row in cursor:
+        print "Putting %s, %s in %s" % (row[0], row[1], str(lastHonestLog))
+        lastHonestLog[row[0]] = row[1]
+
+
     # Calculate total hours
     sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' and te.spent_on <= now() group by u.login order by sum(hours);"
 
@@ -208,20 +219,36 @@ def get_hours():
     dateMin = datetime.date.max
     rosterCheck = dict(firstNames)
     spaceStr = '   '
+
     for row in data:
-	if (row[2] < dateMin):
-		dateMin = row[2]
+        if (row[2] < dateMin):
+            dateMin = row[2]
 
-	maker = row[0]
+        maker = row[0]
+        login = row[0]
+
         if maker in firstNames:
-	    del rosterCheck[maker]
-	    maker = firstNames[maker]
+            del rosterCheck[maker]
+            maker = firstNames[maker]
+
+        hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + spaceStr
 
 
-	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + spaceStr
-
+    firstNamesInv = {v: k for k, v in firstNames.iteritems()}
     for firstName in rosterCheck:
-	hoursLoggedStr = firstName + ': 0' + spaceStr + hoursLoggedStr
+        zeroHourReportItem = firstName + ': 0'
+
+        print "firstName: %s, firstNames: %s, lastHonestLog: %s" % (firstName, str(firstNames.keys), str(lastHonestLog.keys))
+        if firstName in lastHonestLog:
+            zeroHourReportItem += ' (' + lastHonestLog[firstName].strftime('%b %d') + ') ' + spaceStr
+        else:
+            zeroHourReportItem += ' (no sig) ' + spaceStr
+
+
+        zeroHourReportItem += spaceStr
+        hoursLoggedStr =  zeroHourReportItem + hoursLoggedStr
+
+
 
     hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
 

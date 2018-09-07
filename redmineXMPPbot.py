@@ -1,3 +1,25 @@
+
+
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+############################# Deprecated, see redmine_stats.py
+
+
+
+
 #!/usr/bin/python2.7
 from jabberbot import JabberBot, botcmd
 import datetime
@@ -95,6 +117,15 @@ def main():
  	    #lateUsers.append(maker + ' (' + str(round(hoursSinceLastLog, 1)) + ' > ' + str(threshold) + ')');
  	    lateUsers.append(maker)
 
+    # Calculate last logged date (reported if user has logged 0 hours in last 7 days)
+    sql = "select u.login, max(te.updated_on) last_entry from time_entries te, users u where u.status = 1 and u.id = te.user_id and hours > %f group by u.login order by max(te.updated_on);" % 1 #honestLogHours
+
+    cursor.execute(sql)
+    lastHonestLog = {}
+    while row in cursor:
+        lastHonestLog[row[0]] = row[1]
+
+
 
     # Calculate total hours
     sql = "select u.login, sum(hours), min(spent_on) from time_entries te, users u where u.status = 1 and u.id = te.user_id and te.spent_on >= now() - INTERVAL '7 days' and te.spent_on <= now() group by u.login order by sum(hours);"
@@ -105,15 +136,24 @@ def main():
     hoursLoggedStr = ''
     dateMin = datetime.date.max
     for row in data:
-	if (row[2] < dateMin):
-		dateMin = row[2]
+        if (row[2] < dateMin):
+            dateMin = row[2]
 
-	maker = row[0]
+	    maker = row[0]
         if maker in firstNames:
-	    maker = firstNames[maker]
+	        maker = firstNames[maker]
 
-	hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + '   '
-    hoursLoggedStr += '(since ' + str(dateMin) + ')\n'
+        hoursLoggedStr += maker + ': ' + str(round(row[1], 1))  + ' '
+
+        if row[1] < 0.1:
+            hoursLoggedStr += '(' + lastHonestLog[row[0]].stftime('%b %d %Y') + ') '
+        else:
+            debug("NOPE!!!!! This persons log is ok: %s" % row[1])
+            debug(row)
+
+        hoursLoggedStr += '    '
+
+    hoursLoggedStr += '(since ' + str(dateMin) + ') (test)\n'
 
 
     # Calculate hours per project, last 28 days
