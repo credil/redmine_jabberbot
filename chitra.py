@@ -61,7 +61,7 @@ def main():
                   and u.login = '%s'
                   and p.status != 5
                   and te.spent_on between '%s' and '%s'
-                group by p.identifier, p.id, u.login; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
+                group by u.login, mail, p.identifier, p.id; """ % (user, dateSince, dateUntil.strftime('%Y-%m-%d'))
 
             sys.stderr.write(sql)
 
