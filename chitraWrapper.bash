@@ -100,15 +100,7 @@ echo; echo; echo;
 #(a.k.a set -x) to trace what gets executed
 set -o xtrace
 
-output=/tmp/$__base.tsv
-
-
-$__dir/chitra.py `date +"%Y-%m-%d"`| tee $output
-
-msg="Banque pour les makers `~jlam/bin/ds.bash '/'`"
-
-
-echo $msg  | mutt -a $output -s "$msg" -- "`cat $configFile`"
+$__dir/chitra.py `date +"%Y-%m-%d"`
 
 set +x
 
