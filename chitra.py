@@ -175,6 +175,8 @@ def main():
         emailContent  = bankTableHeader
         emailContent += "\n".join(sorted(bankTableForUser.split("\n"))) + "\n\n"
         emailContent += noticeTableForUser
+        emailContent += ("\n" + lengend)
+
 
         print '=== Doing user ' + user + ' ' + ('=' * 72)
         print emailContent
@@ -190,6 +192,8 @@ def main():
     emailContent  = bankTableHeader
     emailContent += "\n".join(sorted(bankTableForAdmin.split("\n"))) + "\n\n"
     emailContent += noticeTableForAdmin
+    emailContent += ("\n" + lengend)
+
 
     # At this point you should email someone
     send_email(':admin', emailContent, dateUntil)
