@@ -129,7 +129,7 @@ def main():
             allTime = cursor.fetchall()
 
             #### Group time stats by top parent project
-            allTime = groupByTopParentChitra(allTime, settings[user][client]['ignore'])
+            allTime = groupByTopParentChitra(allTime, settings[user][client].get('ignore', ()))
 
             bank        = config["bank"]
             since       = config['since']
@@ -159,7 +159,7 @@ def main():
             bankTableForAdmin = bankTableForAdmin + bankTableRow
 
 
-            if settings[user][client]['ignore']:
+            if settings[user][client].get('ignore'):
                 noticeTableRow = "%s\t%s\t%s\n" % (user, "Ignored", "\t".join(settings[user][client]['ignore']))
                 noticeTableForUser += noticeTableRow
                 noticeTableForAdmin += noticeTableRow
