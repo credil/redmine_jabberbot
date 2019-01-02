@@ -175,7 +175,7 @@ def main():
         emailContent  = bankTableHeader
         emailContent += "\n".join(sorted(bankTableForUser.split("\n"))) + "\n\n"
         emailContent += noticeTableForUser
-        emailContent += ("\n" + lengend)
+        emailContent += ("\n" + legend)
 
 
         print '=== Doing user ' + user + ' ' + ('=' * 72)
@@ -192,7 +192,7 @@ def main():
     emailContent  = bankTableHeader
     emailContent += "\n".join(sorted(bankTableForAdmin.split("\n"))) + "\n\n"
     emailContent += noticeTableForAdmin
-    emailContent += ("\n" + lengend)
+    emailContent += ("\n" + legend)
 
 
     # At this point you should email someone
