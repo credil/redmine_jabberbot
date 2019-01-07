@@ -5,7 +5,8 @@ START=$(date +%s.%N)
 arg1=${1:-''}
 
 if [[ $arg1 == '--help' || $arg1 == '-h' ]]; then
-    echo "Script author should have provided documentation"
+    echo "Provides a wrapper for chitra hourly bank monitoring"
+    echo "Usage: $0 [\$date]"
     exit 0
 fi
 
@@ -100,7 +101,9 @@ echo; echo; echo;
 #(a.k.a set -x) to trace what gets executed
 set -o xtrace
 
-$__dir/chitra.py `date +"%Y-%m-%d"`
+untilDate=${1:-date +"%Y-%m-%d"}
+
+$__dir/chitra.py $untilDate
 
 set +x
 
