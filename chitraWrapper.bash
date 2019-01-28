@@ -101,7 +101,7 @@ echo; echo; echo;
 #(a.k.a set -x) to trace what gets executed
 set -o xtrace
 
-untilDate=${1:-date +"%Y-%m-%d"}
+untilDate=${1:-`date +"%Y-%m-%d"`}
 
 $__dir/chitra.py $untilDate
 
