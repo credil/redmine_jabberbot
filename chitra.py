@@ -41,6 +41,7 @@ def send_email(redmineLogin, content, dateUntil):
     if redmineLogin == ':admin':
         emailAddress = adminEmail
         attachmentPathPart = 'admin'
+        msg='Sommaire: ' + msg
     else:
         sql = "select mail from users where login = '%s'" % (redmineLogin)
         sys.stderr.write(sql)
