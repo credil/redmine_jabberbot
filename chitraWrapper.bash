@@ -76,8 +76,8 @@ trap "rm -f $pidfile" INT QUIT TERM ERR
 #Capture everything to log
 mkdir -p ~/log
 log=~/log/$__base-${ts}.log
-exec >  >(tee -a $log)
-exec 2> >(tee -a $log >&2)
+#exec >  >(tee -a $log)
+#exec 2> >(tee -a $log >&2)
 touch $log
 chmod 600 $log
 
@@ -102,8 +102,9 @@ echo; echo; echo;
 set -o xtrace
 
 untilDate=${1:-`date +"%Y-%m-%d"`}
+mail=${2:-'doemail'}
 
-$__dir/chitra.py $untilDate
+$__dir/chitra.py $untilDate $mail
 
 set +x
 

@@ -9,6 +9,7 @@ import time;
 import datetime
 from redmine_stats import buildTopParentMap, groupByTopParentChitra;
 import os
+import time
 #from subprocess import call
 import subprocess
 
@@ -77,6 +78,15 @@ def send_email(redmineLogin, content, dateUntil):
 
 
 def main():
+    email=True
+    if (sys.argv[2] != 'noemail'):
+        print "Will email\n"
+    else:
+        print "No email\n"
+        email=False
+
+    time.sleep(3)
+
     # print the connection string we will use to connect
     #debug("Connecting to database...")
 
@@ -89,7 +99,7 @@ def main():
 
 
     dateUntil = first_day_of_month(datetime.datetime.now())
-    if sys.argv[1:]:
+    if sys.argv[1]:
         dateUntil = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d')
         dateUntil = dateUntil.date()
 
@@ -183,7 +193,8 @@ def main():
         print emailContent
 
         # At this point you should email someone
-        send_email(user, emailContent, dateUntil)
+        if email:
+            send_email(user, emailContent, dateUntil)
 
 
 
@@ -195,9 +206,12 @@ def main():
     emailContent += noticeTableForAdmin
     emailContent += ("\n" + legend)
 
+    print emailContent
 
     # At this point you should email someone
-    send_email(':admin', emailContent, dateUntil)
+    if email:
+        send_email(':admin', emailContent, dateUntil)
+
 
 
 
