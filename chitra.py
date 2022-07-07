@@ -44,7 +44,7 @@ def send_email(redmineLogin, content, dateUntil):
         attachmentPathPart = 'admin'
         msg='Sommaire: ' + msg
     else:
-        sql = "select mail from users where login = '%s'" % (redmineLogin)
+        sql = "select address from users inner join email_addresses e on e.user_id = users.id where login = '%s'" % (redmineLogin)
         sys.stderr.write(sql)
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
