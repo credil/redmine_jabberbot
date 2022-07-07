@@ -6,7 +6,8 @@ arg1=${1:-''}
 
 if [[ $arg1 == '--help' || $arg1 == '-h' ]]; then
     echo "Provides a wrapper for chitra hourly bank monitoring"
-    echo "Usage: $0 [\$date]"
+    echo "By default, it will email to the maker and the admin.  Specify noemail to skip email."
+    echo "Usage: $0 [\$date] [noemail]"
     exit 0
 fi
 
